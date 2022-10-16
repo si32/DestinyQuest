@@ -10,7 +10,7 @@ empty_hero = {
     "armour": 0,
     "health": 30
   },
-  "money_pouch": 0,
+  "money_pouch": 10,
   "equipment": {
     "cloak": {
       "equipment_name": "",
