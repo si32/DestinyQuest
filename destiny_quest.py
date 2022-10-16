@@ -8,7 +8,7 @@ from player import empty_hero, Player
 # Чтобы русские символы из json в stdout нормально отображались
 sys.stdout.reconfigure(encoding='cp1251')
 
-PROGRAM_NAME = "Destiny Quest Hero List"
+PROGRAM_NAME = "Destiny Quest Hero List (v.1.0)"
 
 FONT_STATS = ("Courier New", 13, "bold")
 FONT_SIZE_CHARACTERISTICS = ("Courier New", 13, "bold")
@@ -70,7 +70,6 @@ class DestinyQuest:
 
         with open(filepath, "r", encoding='utf-8') as input_file:
             self.player = Player(json.load(input_file))
-            print("done!")
             self.mainframe.destroy()
             self.init_gui()
 
@@ -137,7 +136,10 @@ class DestinyQuest:
             except ValueError:
                 self.armour = 0
         # Посчитать урон
-        self.damage = attack_result - self.armour
+        if attack_result > self.armour:
+            self.damage = attack_result - self.armour
+        else:
+            self.damage = 0
         # Уменьшить здоровье
         if player == "hero":
             # temporary (for each battte) health
