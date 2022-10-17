@@ -270,7 +270,7 @@ class DestinyQuest:
             if test == "attack":
                 self.make_damage(self.attack_result, "hero")
 
-    # Словать открытых окон для каждого оборудования. Чтобы окно для каждого оборудования открывалось 1 раз.
+    # Словарь открытых окон для каждого оборудования. Чтобы окно для каждого оборудования открывалось 1 раз.
     global opened_window
     opened_window = {}
     def open_equipment_window(self, equipment_cell_name):
@@ -278,7 +278,9 @@ class DestinyQuest:
         global opened_window
         if equipment_cell_name not in opened_window.keys():
             opened_window[equipment_cell_name] = 1
-            self.newWindow = EquipmentWindow(equipment_cell_name)
+            self.equipment_window = EquipmentWindow(equipment_cell_name)
+            # Запретить пользователю взаимодействовать с основным окном
+            self.equipment_window.grab_set()
 
     """ GUI """
     def create_menu(self):
