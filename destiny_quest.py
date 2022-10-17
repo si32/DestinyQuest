@@ -11,15 +11,21 @@ sys.stdout.reconfigure(encoding='cp1251')
 PROGRAM_NAME = "Destiny Quest Hero List (v.1.0)"
 
 FONT_STATS = ("Courier New", 13, "bold")
-FONT_SIZE_CHARACTERISTICS = ("Courier New", 13, "bold")
+# FONT_SIZE_CHARACTERISTICS = ("Courier New", 13, "bold")
 FONT_DICES_RESULT = ("Courier New", 25, "bold")
 FONT_DICES_BUTTON = ("Courier New", 10)
+FONT_EQUIPMENT_LBL = ("Courier New", 12, "bold")
+FONT_EQUIPMENT_VALUE_LBL = ("Courier New", 10)
+
+# Через 40 мм переносить текст на другую строку в label
+WRAP_EQUIPMENT_VALUE_LBL = "40m"
 
 BG_MAINFRAME = "#fce3ff"
 COLOR_AGILITY = "#c1f797"
 COLOR_ATTACK = "#e0807b"
 COLOR_TEST = "#7cc7f5"
 COLOR_REFRESH = "#dbdbdb"
+COLOR_EQUIPMENT = "#dbdbdb"
 
 ICON_HERO = "\N{Mage}"
 ICON_ENEMY = "\N{Dragon Face}"
@@ -34,6 +40,9 @@ ICON_ARMOUR = "\N{BLACK CROSS ON SHIELD}"
 ICON_HEALTH = "\N{White Heart}"
 ICON_BROKEN_HEART = "\N{Broken Heart}"
 ICON_ENEMY_SPECIAL_ABILITY = "\N{Skull}"
+ICON_BACKPACK = "\N{School Satchel}"
+ICON_PLUS = "\N{Heavy Plus Sign}"
+ICON_MINUS = "\N{Heavy Minus Sign}"
 
 class DestinyQuest:
     def __init__(self, root):
@@ -44,6 +53,7 @@ class DestinyQuest:
 
         self.player = Player(empty_hero)
         # print(self.player.__dict__)
+
 
         self.init_gui()
 
@@ -57,6 +67,9 @@ class DestinyQuest:
         self.create_stats_field()
         self.create_dices_field()
         self.refresh_result()
+        self.create_equipment_btn()
+
+
 
     def open_file(self):
         filepath = askopenfilename(
@@ -281,6 +294,7 @@ class DestinyQuest:
         self.stats_field = tk.Frame(self.mainframe)
         self.stats_field.rowconfigure(0, weight=1)
         self.stats_field.columnconfigure(0, weight=1)
+        # какая строка верх или низ правильная?
         self.stats_field.columnconfigure(1, weight=1)
         self.stats_hero_field = tk.Frame(self.stats_field)
         self.stats_enemy_field = tk.Frame(self.stats_field)
@@ -373,7 +387,6 @@ class DestinyQuest:
         """ Dices field """
         # Frames
         self.dices_field = tk.Frame(self.mainframe, borderwidth=2, relief=tk.GROOVE, padx=2)
-
         self.dices_field.rowconfigure([0, 1, 2], weight=1)
         self.dices_field.columnconfigure([0, 1, 2, 3, 4], weight=1)
 
@@ -434,10 +447,144 @@ class DestinyQuest:
         command=lambda:self.get_result(dices=1, player="enemy", test="attack"),
         )
         self.enemy_dices_attack_btn.grid(row=2, column=4, sticky="ew", pady=5)
+# =============================================================================================================================================
+    # Enemy dices result buttons
+    def create_equipment_btn(self):
+        # При открытии программы оборудование скрыто
+        self._equipment_closed = True
+        self.equipment_btn = tk.Button(
+        master=self.mainframe,
+        text=f"{ICON_PLUS}{ICON_BACKPACK}Equipment",
+        font=FONT_DICES_BUTTON,
+        fg="orange",
+        width=20,
+        command=self.operate_equipment_btn,
+        )
+        self.equipment_btn.grid(row=2, sticky="nws")
 
-# class equipment(tk.Frame):
-#     def __init__(self):
-#         super().__init__()
+    def operate_equipment_btn(self):
+        """ Обработка нажатия кнопки Equipment """
+        # Добавить сохранение в json всего что изменено
+        if self._equipment_closed:
+            self.create_equipment_field()
+            self.equipment_btn["text"] = f"{ICON_MINUS}{ICON_BACKPACK}Equipment"
+            self._equipment_closed = False
+        else:
+            self.equipment_field.grid_forget()
+            self.equipment_btn["text"] = f"{ICON_PLUS}{ICON_BACKPACK}Equipment"
+            self._equipment_closed = True
+
+
+    def create_equipment_field(self):
+        """ Equipment field """
+        # Frames
+        self.equipment_field = tk.Frame(self.mainframe, borderwidth=2, relief=tk.GROOVE, padx=2)
+        self.equipment_field.rowconfigure([0, 1], weight=1)
+        self.equipment_field.columnconfigure(0, weight=1)
+
+        self.outfit_field = tk.Frame(self.equipment_field)
+        self.outfit_field.rowconfigure([0, 1, 2, 3, 4, 5, 6, 7], weight=1)
+        self.outfit_field.columnconfigure([0, 1, 2], weight=1)
+
+        self.backpack_field = tk.Frame(self.equipment_field)
+        self.backpack_field.rowconfigure([0, 1, 2, 3], weight=1)
+        self.backpack_field.columnconfigure([0, 1, 2, 3, 4], weight=1)
+
+        # Grid Frames
+        self.equipment_field.grid(row=3, sticky="nsew")
+        self.outfit_field.grid(row=0, sticky="nsew")
+        self.backpack_field.grid(row=1, sticky="nsew")
+
+        # Cloak
+        self.cloak_lbl = tk.Label(master=self.outfit_field, text="Cloak:", font=FONT_EQUIPMENT_LBL, bg=COLOR_EQUIPMENT, anchor="n")
+        self.cloak_value_lbl = tk.Label(master=self.outfit_field, wraplength=WRAP_EQUIPMENT_VALUE_LBL, text="мантия чародея из кожы васильска", font=FONT_EQUIPMENT_VALUE_LBL, bg=COLOR_EQUIPMENT, height=2, anchor="n")
+        self.cloak_lbl.grid(row=0, column=0, sticky="nsew", pady=(2,0), padx=2)
+        self.cloak_value_lbl.grid(row=1, column=0, sticky="nsew", padx=2)
+        # Head
+        self.head_lbl = tk.Label(master=self.outfit_field, text="Head:", font=FONT_EQUIPMENT_LBL, bg=COLOR_EQUIPMENT, anchor="n")
+        self.head_value_lbl = tk.Label(master=self.outfit_field, wraplength=WRAP_EQUIPMENT_VALUE_LBL, text="Корона", font=FONT_EQUIPMENT_VALUE_LBL, bg=COLOR_EQUIPMENT, height=2, anchor="n")
+        self.head_lbl.grid(row=0, column=1, sticky="nsew", pady=(2,0))
+        self.head_value_lbl.grid(row=1, column=1, sticky="nsew")
+        # Gloves
+        self.gloves_lbl = tk.Label(master=self.outfit_field, text="Gloves:", font=FONT_EQUIPMENT_LBL, bg=COLOR_EQUIPMENT, anchor="n")
+        self.gloves_value_lbl = tk.Label(master=self.outfit_field, wraplength=WRAP_EQUIPMENT_VALUE_LBL, text="ПДракона", font=FONT_EQUIPMENT_VALUE_LBL, bg=COLOR_EQUIPMENT, height=2, anchor="n")
+        self.gloves_lbl.grid(row=0, column=2, sticky="nsew", pady=(2,0), padx=2)
+        self.gloves_value_lbl.grid(row=1, column=2, sticky="nsew", padx=2)
+        # Ring 1
+        self.ring1_lbl = tk.Label(master=self.outfit_field, text="Ring 1:", font=FONT_EQUIPMENT_LBL, bg=COLOR_EQUIPMENT, anchor="n")
+        self.ring1_value_lbl = tk.Label(master=self.outfit_field, wraplength=WRAP_EQUIPMENT_VALUE_LBL, text="Кольцо власти:", font=FONT_EQUIPMENT_VALUE_LBL, bg=COLOR_EQUIPMENT, height=2, anchor="n")
+        self.ring1_lbl.grid(row=2, column=0, sticky="nsew", pady=(2,0), padx=2)
+        self.ring1_value_lbl.grid(row=3, column=0, sticky="nsew", padx=2)
+        # Necklace
+        self.necklace_lbl = tk.Label(master=self.outfit_field, text="Necklace:", font=FONT_EQUIPMENT_LBL, bg=COLOR_EQUIPMENT, anchor="n")
+        self.necklace_value_lbl = tk.Label(master=self.outfit_field,wraplength=WRAP_EQUIPMENT_VALUE_LBL,  text="", font=FONT_EQUIPMENT_VALUE_LBL, bg=COLOR_EQUIPMENT, height=2, anchor="n")
+        self.necklace_lbl.grid(row=2, column=1, sticky="nsew", pady=(2,0))
+        self.necklace_value_lbl.grid(row=3, column=1, sticky="nsew")
+        # Ring 2
+        self.ring2_lbl = tk.Label(master=self.outfit_field, text="Ring 2:", font=FONT_EQUIPMENT_LBL, bg=COLOR_EQUIPMENT, anchor="n")
+        self.ring2_value_lbl = tk.Label(master=self.outfit_field, wraplength=WRAP_EQUIPMENT_VALUE_LBL, text="", font=FONT_EQUIPMENT_VALUE_LBL, bg=COLOR_EQUIPMENT, height=2, anchor="n")
+        self.ring2_lbl.grid(row=2, column=2, sticky="nsew", pady=(2,0), padx=2)
+        self.ring2_value_lbl.grid(row=3, column=2, sticky="nsew", padx=2)
+        # # Right hand
+        self.right_hand_lbl = tk.Label(master=self.outfit_field, text="Right hand:", font=FONT_EQUIPMENT_LBL, bg=COLOR_EQUIPMENT, anchor="n")
+        self.right_hand_value_lbl = tk.Label(master=self.outfit_field, wraplength=WRAP_EQUIPMENT_VALUE_LBL, text="", font=FONT_EQUIPMENT_VALUE_LBL, bg=COLOR_EQUIPMENT, height=2, anchor="n")
+        self.right_hand_lbl.grid(row=4, column=0, sticky="nsew", pady=(2,0), padx=2)
+        self.right_hand_value_lbl.grid(row=5, column=0, sticky="nsew", padx=2)
+        # Chest
+        self.chest_lbl = tk.Label(master=self.outfit_field, text="Chest:", font=FONT_EQUIPMENT_LBL, bg=COLOR_EQUIPMENT, anchor="n")
+        self.chest_value_lbl = tk.Label(master=self.outfit_field, wraplength=WRAP_EQUIPMENT_VALUE_LBL, text="", font=FONT_EQUIPMENT_VALUE_LBL, bg=COLOR_EQUIPMENT, height=2, anchor="n")
+        self.chest_lbl.grid(row=4, column=1, sticky="nsew", pady=(2,0))
+        self.chest_value_lbl.grid(row=5, column=1, sticky="nsew")
+        # Left hand
+        self.left_hand_lbl = tk.Label(master=self.outfit_field, text="Left hand:", font=FONT_EQUIPMENT_LBL, bg=COLOR_EQUIPMENT, anchor="n")
+        self.left_hand_value_lbl = tk.Label(master=self.outfit_field, wraplength=WRAP_EQUIPMENT_VALUE_LBL, text="", font=FONT_EQUIPMENT_VALUE_LBL, bg=COLOR_EQUIPMENT, height=2, anchor="n")
+        self.left_hand_lbl.grid(row=4, column=2, sticky="nsew", pady=(2,0), padx=2)
+        self.left_hand_value_lbl.grid(row=5, column=2, sticky="nsew", padx=2)
+        # Talisman
+        self.talisman_lbl = tk.Label(master=self.outfit_field, text="Talisman:", font=FONT_EQUIPMENT_LBL, bg=COLOR_EQUIPMENT, anchor="n")
+        self.talisman_value_lbl = tk.Label(master=self.outfit_field, wraplength=WRAP_EQUIPMENT_VALUE_LBL, text="", font=FONT_EQUIPMENT_VALUE_LBL, bg=COLOR_EQUIPMENT, height=2, anchor="n")
+        self.talisman_lbl.grid(row=6, column=0, sticky="nsew", pady=(2,0), padx=2)
+        self.talisman_value_lbl.grid(row=7, column=0, sticky="nsew", padx=2)
+        # Feet
+        self.feet_lbl = tk.Label(master=self.outfit_field, text="Feet:", font=FONT_EQUIPMENT_LBL, bg=COLOR_EQUIPMENT, anchor="n")
+        self.feet_value_lbl = tk.Label(master=self.outfit_field, wraplength=WRAP_EQUIPMENT_VALUE_LBL, text="", font=FONT_EQUIPMENT_VALUE_LBL, bg=COLOR_EQUIPMENT, height=2, anchor="n")
+        self.feet_lbl.grid(row=6, column=1, sticky="nsew", pady=(2,0))
+        self.feet_value_lbl.grid(row=7, column=1, sticky="nsew")
+        # Money pouch
+        self.money_pouch_lbl = tk.Label(master=self.outfit_field, text="Money pouch:", font=FONT_EQUIPMENT_LBL, bg=COLOR_EQUIPMENT, anchor="n")
+        self.money_pouch_value_lbl = tk.Label(master=self.outfit_field, wraplength=WRAP_EQUIPMENT_VALUE_LBL, text="", font=FONT_EQUIPMENT_VALUE_LBL, bg=COLOR_EQUIPMENT, height=2, anchor="n")
+        self.money_pouch_lbl.grid(row=6, column=2, sticky="nsew", pady=(2,0), padx=2)
+        self.money_pouch_value_lbl.grid(row=7, column=2, sticky="nsew", padx=2)
+
+        # Backpack
+        self.backpack_lbl = tk.Label(master=self.backpack_field, text="Backpack:", font=FONT_EQUIPMENT_LBL, anchor="nw")
+        self.backpack_lbl.grid(row=0, column=0, columnspan=5, sticky="nsew", padx=2)
+        # Cell 1
+        self.cell1_lbl = tk.Label(master=self.backpack_field, wraplength=WRAP_EQUIPMENT_VALUE_LBL, text="Копье", font=FONT_EQUIPMENT_VALUE_LBL, bg=COLOR_EQUIPMENT, height=2, anchor="n")
+        self.cell1_lbl.grid(row=1, column=0, sticky="nsew", padx=1)
+        # Cell 2
+        self.cell2_lbl = tk.Label(master=self.backpack_field, wraplength=WRAP_EQUIPMENT_VALUE_LBL, text="Копье", font=FONT_EQUIPMENT_VALUE_LBL, bg=COLOR_EQUIPMENT, height=2, anchor="n")
+        self.cell2_lbl.grid(row=1, column=1, sticky="nsew", padx=1)
+        # Cell 3
+        self.cell3_lbl = tk.Label(master=self.backpack_field, wraplength=WRAP_EQUIPMENT_VALUE_LBL, text="Копье", font=FONT_EQUIPMENT_VALUE_LBL, bg=COLOR_EQUIPMENT, height=2, anchor="n")
+        self.cell3_lbl.grid(row=1, column=2, sticky="nsew", padx=1)
+        # Cell 4
+        self.cell4_lbl = tk.Label(master=self.backpack_field, wraplength=WRAP_EQUIPMENT_VALUE_LBL, text="Копье", font=FONT_EQUIPMENT_VALUE_LBL, bg=COLOR_EQUIPMENT, height=2, anchor="n")
+        self.cell4_lbl.grid(row=1, column=3, sticky="nsew", padx=1)
+        # Cell 5
+        self.cell5_lbl = tk.Label(master=self.backpack_field, wraplength=WRAP_EQUIPMENT_VALUE_LBL, text="Копье", font=FONT_EQUIPMENT_VALUE_LBL, bg=COLOR_EQUIPMENT, height=2, anchor="n")
+        self.cell5_lbl.grid(row=1, column=4, sticky="nsew", padx=1)
+        # Notes
+        self.notes_lbl = tk.Label(master=self.backpack_field, text="Notes:", font=FONT_EQUIPMENT_LBL, anchor="nw")
+        self.notes_lbl.grid(row=2, column=0, columnspan=5, sticky="nsew", padx=2)
+        self.notes_txt = tk.Text(master=self.backpack_field, height=3)
+        self.notes_txt.grid(row=4, columnspan=5, sticky="nwse", padx=2, pady=2)
+
+
+
+
+
+
 
 
 # =============================================================================================================================
