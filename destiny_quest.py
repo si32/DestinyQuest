@@ -4,6 +4,7 @@ import random
 import json
 import sys
 from player import empty_hero, Player
+from equipment_window_class import EquipmentWindow
 
 # Чтобы русские символы из json в stdout нормально отображались
 sys.stdout.reconfigure(encoding='cp1251')
@@ -20,7 +21,7 @@ FONT_EQUIPMENT_VALUE_LBL = ("Courier New", 10)
 # Через 40 мм переносить текст на другую строку в label
 WRAP_EQUIPMENT_VALUE_LBL = "40m"
 
-BG_MAINFRAME = "#fce3ff"
+# BG_MAINFRAME = "#fce3ff"
 COLOR_AGILITY = "#c1f797"
 COLOR_ATTACK = "#e0807b"
 COLOR_TEST = "#7cc7f5"
@@ -270,6 +271,16 @@ class DestinyQuest:
             if test == "attack":
                 self.make_damage(self.attack_result, "hero")
 
+    # Словать открытых окон для каждого оборудования. Чтобы окно для каждого оборудования открывалось 1 раз.
+    global opened_window
+    opened_window = {}
+    def open_equipment_window(self, equipment_cell_name):
+        """ Открыть одно новое окно для любой ячейки в обмундировании и рюкзаке """
+        global opened_window
+        if equipment_cell_name not in opened_window.keys():
+            opened_window[equipment_cell_name] = 1
+            self.newWindow = EquipmentWindow(equipment_cell_name)
+
     """ GUI """
     def create_menu(self):
         """ Menu """
@@ -283,7 +294,7 @@ class DestinyQuest:
 
     def create_mainframe(self):
         """ Create mainframe """
-        self.mainframe = tk.Frame(self.root, bg=BG_MAINFRAME)
+        self.mainframe = tk.Frame(self.root)
         self.mainframe.rowconfigure([0, 1, 2, 3], weight=1)
         self.mainframe.columnconfigure(0, weight=1)
         self.mainframe.grid(padx=3)
@@ -579,13 +590,101 @@ class DestinyQuest:
         self.notes_lbl.grid(row=2, column=0, columnspan=5, sticky="nsew", padx=2)
         self.notes_txt = tk.Text(master=self.backpack_field, height=3)
         self.notes_txt.grid(row=4, columnspan=5, sticky="nwse", padx=2, pady=2)
+        #  Open equipment windows by click
+        self.cloak_lbl.bind("<Button-1>", lambda e: self.open_equipment_window(self.cloak_lbl["text"]))
+        self.cloak_value_lbl.bind("<Button-1>", lambda e: self.open_equipment_window(self.cloak_lbl["text"]))
+        self.head_lbl.bind("<Button-1>", lambda e: self.open_equipment_window(self.head_lbl["text"]))
+        self.head_value_lbl.bind("<Button-1>", lambda e: self.open_equipment_window(self.head_lbl["text"]))
+        self.gloves_lbl.bind("<Button-1>", lambda e: self.open_equipment_window(self.gloves_lbl["text"]))
+        self.gloves_value_lbl.bind("<Button-1>", lambda e: self.open_equipment_window(self.gloves_lbl["text"]))
+        self.ring1_lbl.bind("<Button-1>", lambda e: self.open_equipment_window(self.ring1_lbl["text"]))
+        self.ring1_value_lbl.bind("<Button-1>", lambda e: self.open_equipment_window(self.ring1_lbl["text"]))
+        self.necklace_lbl.bind("<Button-1>", lambda e: self.open_equipment_window(self.necklace_lbl["text"]))
+        self.necklace_value_lbl.bind("<Button-1>", lambda e: self.open_equipment_window(self.necklace_lbl["text"]))
+        self.ring2_lbl.bind("<Button-1>", lambda e: self.open_equipment_window(self.ring2_lbl["text"]))
+        self.ring2_value_lbl.bind("<Button-1>", lambda e: self.open_equipment_window(self.ring2_lbl["text"]))
+        self.right_hand_lbl.bind("<Button-1>", lambda e: self.open_equipment_window(self.right_hand_lbl["text"]))
+        self.right_hand_value_lbl.bind("<Button-1>", lambda e: self.open_equipment_window(self.right_hand_lbl["text"]))
+        self.chest_lbl.bind("<Button-1>", lambda e: self.open_equipment_window(self.chest_lbl["text"]))
+        self.chest_value_lbl.bind("<Button-1>", lambda e: self.open_equipment_window(self.chest_lbl["text"]))
+        self.left_hand_lbl.bind("<Button-1>", lambda e: self.open_equipment_window(self.left_hand_lbl["text"]))
+        self.left_hand_value_lbl.bind("<Button-1>", lambda e: self.open_equipment_window(self.left_hand_lbl["text"]))
+        self.talisman_lbl.bind("<Button-1>", lambda e: self.open_equipment_window(self.talisman_lbl["text"]))
+        self.talisman_value_lbl.bind("<Button-1>", lambda e: self.open_equipment_window(self.talisman_lbl["text"]))
+        self.feet_lbl.bind("<Button-1>", lambda e: self.open_equipment_window(self.feet_lbl["text"]))
+        self.feet_value_lbl.bind("<Button-1>", lambda e: self.open_equipment_window(self.feet_lbl["text"]))
+        self.money_pouch_lbl.bind("<Button-1>", lambda e: self.open_equipment_window(self.money_pouch_lbl["text"]))
+        self.money_pouch_value_lbl.bind("<Button-1>", lambda e: self.open_equipment_window(self.money_pouch_lbl["text"]))
+        self.cell1_lbl.bind("<Button-1>", lambda e: self.open_equipment_window("Backpack cell 1:"))
+        self.cell2_lbl.bind("<Button-1>", lambda e: self.open_equipment_window("Backpack cell 2:"))
+        self.cell3_lbl.bind("<Button-1>", lambda e: self.open_equipment_window("Backpack cell 3:"))
+        self.cell4_lbl.bind("<Button-1>", lambda e: self.open_equipment_window("Backpack cell 4:"))
+        self.cell5_lbl.bind("<Button-1>", lambda e: self.open_equipment_window("Backpack cell 5:"))
 
+# =============================================================================================================================
+class EquipmentWindow(tk.Toplevel):
+    def __init__(self, equipment_cell_name):
+        super().__init__()
+        self.equipment_cell_name = equipment_cell_name
+        self.title(f"Сharacteristics {self.equipment_cell_name}")
+        self.resizable(False,False)
 
+        self.init_gui()
 
-
-
-
-
+    def init_gui(self):
+        """ Create window GUI """
+        # Create mainframe
+        self.mainframe = tk.Frame(self)
+        self.mainframe.rowconfigure([0, 1, 2], weight=1)
+        self.mainframe.columnconfigure(0, weight=1)
+        # Create equipment_cell_name frame
+        self.equipment_cell_name_field = tk.Frame(self.mainframe)
+        self.equipment_cell_name_field.rowconfigure(0, weight=1)
+        self.equipment_cell_name_field.columnconfigure(0, weight=1)
+        # Create equipment_stats frame
+        self.equipment_stats_field = tk.Frame(self.mainframe)
+        self.equipment_stats_field.rowconfigure([0, 1], weight=1)
+        self.equipment_stats_field.columnconfigure([0,1,2,3,4,5,6,7], weight=1)
+        # Create buttons frame
+        self.buttons_field = tk.Frame(self.mainframe)
+        self.buttons_field.rowconfigure(0, weight=1)
+        self.buttons_field.columnconfigure([0,1,2], weight=1)
+        # Frames grid
+        self.mainframe.grid(padx=3)
+        self.equipment_cell_name_field.grid(row=0, sticky="nsew", padx=5, pady=5)
+        self.equipment_stats_field.grid(row=1, sticky="nsew", padx=5, pady=5)
+        self.buttons_field.grid(row=2, sticky="nsew", padx=5, pady=(10,5))
+        # Equipment cell name label
+        self.equipment_cell_name_lbl = tk.Label(master=self.equipment_cell_name_field, text=f"{self.equipment_cell_name[:-1]}", font=FONT_STATS)
+        self.equipment_cell_name_lbl.grid(row=0, sticky="w")
+        # Equipment stats
+        self.equipment_name_lbl = tk.Label(self.equipment_stats_field, text="Name: ", font=FONT_STATS)
+        self.equipment_name_lbl.grid(row=0, sticky="nw", columnspan=2)
+        self.equipment_name_ent = tk.Entry(self.equipment_stats_field, font=FONT_STATS)
+        self.equipment_name_ent.grid(row=0, sticky="nw", column=2, columnspan=6)
+        self.equipment_speed_lbl = tk.Label(self.equipment_stats_field, text=f"{ICON_SPEED}", font=FONT_STATS)
+        self.equipment_speed_lbl.grid(row=1, column=0, sticky="e")
+        self.equipment_speed_ent = tk.Entry(self.equipment_stats_field, width=2, font=FONT_STATS)
+        self.equipment_speed_ent.grid(row=1, column=1, sticky="ew")
+        self.equipment_brawn_lbl = tk.Label(self.equipment_stats_field, text=f"{ICON_BRAWN}", font=FONT_STATS)
+        self.equipment_brawn_lbl.grid(row=1, column=2, sticky="e")
+        self.equipment_brawn_ent = tk.Entry(self.equipment_stats_field, width=2, font=FONT_STATS)
+        self.equipment_brawn_ent.grid(row=1, column=3, sticky="ew")
+        self.equipment_magic_lbl = tk.Label(self.equipment_stats_field, text=f"{ICON_MAGIC}", font=FONT_STATS)
+        self.equipment_magic_lbl.grid(row=1, column=4, sticky="e")
+        self.equipment_magic_ent = tk.Entry(self.equipment_stats_field, width=2, font=FONT_STATS)
+        self.equipment_magic_ent.grid(row=1, column=5, sticky="ew")
+        self.equipment_armour_lbl = tk.Label(self.equipment_stats_field, text=f"{ICON_ARMOUR}", font=FONT_STATS)
+        self.equipment_armour_lbl.grid(row=1, column=6, sticky="e")
+        self.equipment_armour_ent = tk.Entry(self.equipment_stats_field, width=2, font=FONT_STATS)
+        self.equipment_armour_ent.grid(row=1, column=7, sticky="ew")
+        # Buttons
+        self.put_on_btn = tk.Button(master=self.buttons_field, text="Put on")
+        self.throw_away_btn = tk.Button(master=self.buttons_field, text="Throw away")
+        self.in_backpack_btn = tk.Button(master=self.buttons_field, text="In backpack")
+        self.put_on_btn.grid(row=0, column=0, sticky="nsew", padx=5)
+        self.throw_away_btn.grid(row=0, column=1, sticky="nsew", padx=5)
+        self.in_backpack_btn.grid(row=0, column=2, sticky="nsew", padx=5)
 
 # =============================================================================================================================
 def main():
