@@ -4,7 +4,6 @@ import random
 import json
 import sys
 from player import empty_hero, Player
-from equipment_window_class import EquipmentWindow
 
 # Чтобы русские символы из json в stdout нормально отображались
 sys.stdout.reconfigure(encoding='cp1251')
@@ -459,7 +458,6 @@ class DestinyQuest:
         )
         self.enemy_dices_attack_btn.grid(row=2, column=4, sticky="ew", pady=5)
 # =============================================================================================================================================
-    # Enemy dices result buttons
     def create_equipment_btn(self):
         # При открытии программы оборудование скрыто
         self._equipment_closed = True
@@ -623,6 +621,7 @@ class DestinyQuest:
 
 # =============================================================================================================================
 class EquipmentWindow(tk.Toplevel):
+    """ Class for creating a new window for any equipment cell """
     def __init__(self, equipment_cell_name):
         super().__init__()
         self.equipment_cell_name = equipment_cell_name
