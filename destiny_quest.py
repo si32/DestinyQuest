@@ -50,7 +50,7 @@ class DestinyQuest:
         self.root = root
         self.root.title(PROGRAM_NAME)
         self.root.resizable(False,False)
-
+        # Open app with new hero
         self.player = Player(empty_hero)
         # print(self.player.__dict__)
 
@@ -68,9 +68,7 @@ class DestinyQuest:
         self.create_dices_field()
         self.refresh_result()
         self.create_equipment_btn()
-
-
-
+# =============================================================================================================================================
     def open_file(self):
         filepath = askopenfilename(
             filetypes=[("Json Files", "*.json"), ("All Files", "*.*")],
@@ -78,9 +76,7 @@ class DestinyQuest:
             )
         if not filepath:
             return
-
         # Сохранять героя при открытии нового героя
-
         with open(filepath, "r", encoding='utf-8') as input_file:
             self.player = Player(json.load(input_file))
             self.mainframe.destroy()
@@ -97,7 +93,7 @@ class DestinyQuest:
         with open(filepath, "w", encoding='utf-8') as output_file:
             json.dump(self.player, output_file, default=Player.player_2_json,  ensure_ascii=False, indent=4)
 
-
+# =============================================================================================================================================
     def refresh_result(self):
         """ Обновить результаты подсчетов """
         self.hero_dices_result_lbl["text"] = "-"
@@ -270,18 +266,6 @@ class DestinyQuest:
             if test == "attack":
                 self.make_damage(self.attack_result, "hero")
 
-    # Словарь открытых окон для каждого оборудования. Чтобы окно для каждого оборудования открывалось 1 раз.
-    global opened_window
-    opened_window = {}
-    def open_equipment_window(self, equipment_cell_name):
-        """ Открыть одно новое окно для любой ячейки в обмундировании и рюкзаке """
-        global opened_window
-        if equipment_cell_name not in opened_window.keys():
-            opened_window[equipment_cell_name] = 1
-            self.equipment_window = EquipmentWindow(equipment_cell_name)
-            # Запретить пользователю взаимодействовать с основным окном
-            self.equipment_window.grab_set()
-
     """ GUI """
     def create_menu(self):
         """ Menu """
@@ -389,7 +373,7 @@ class DestinyQuest:
         self.hero_brawn_lbl.bind("<Button-1>", lambda e: self.get_result(dices=2, player="hero", test="brawn"))
         self.hero_magic_lbl.bind("<Button-1>", lambda e: self.get_result(dices=2, player="hero", test="magic"))
         self.hero_armour_lbl.bind("<Button-1>", lambda e: self.get_result(dices=2, player="hero", test="armour"))
-        # refresh health after battle
+        # refresh hero health after battle
         self.hero_health_lbl.bind("<Button-1>", lambda e: self.refresh_hero_health())
         # refresh enemy stats after battle
         self.enemy_name_lbl.bind("<Button-1>", lambda e: self.refresh_enemy())
@@ -485,7 +469,6 @@ class DestinyQuest:
             self.equipment_btn["text"] = f"{ICON_PLUS}{ICON_BACKPACK}Equipment"
             self._equipment_closed = True
 
-
     def create_equipment_field(self):
         """ Equipment field """
         # Frames
@@ -506,11 +489,13 @@ class DestinyQuest:
         self.outfit_field.grid(row=0, sticky="nsew")
         self.backpack_field.grid(row=1, sticky="nsew")
 
-        # Cloak
+        # Cloak💎
         self.cloak_lbl = tk.Label(master=self.outfit_field, text="Cloak:", font=FONT_EQUIPMENT_LBL, bg=COLOR_EQUIPMENT, anchor="n")
-        self.cloak_value_lbl = tk.Label(master=self.outfit_field, wraplength=WRAP_EQUIPMENT_VALUE_LBL, text="мантия чародея из кожы васильска", font=FONT_EQUIPMENT_VALUE_LBL, bg=COLOR_EQUIPMENT, height=2, anchor="n")
+        self.cloak_value_lbl = tk.Label(
+            master=self.outfit_field, wraplength=WRAP_EQUIPMENT_VALUE_LBL, text=self.player.cloak_name, font=FONT_EQUIPMENT_VALUE_LBL, bg=COLOR_EQUIPMENT, height=2, anchor="n")
         self.cloak_lbl.grid(row=0, column=0, sticky="nsew", pady=(2,0), padx=2)
         self.cloak_value_lbl.grid(row=1, column=0, sticky="nsew", padx=2)
+
         # Head
         self.head_lbl = tk.Label(master=self.outfit_field, text="Head:", font=FONT_EQUIPMENT_LBL, bg=COLOR_EQUIPMENT, anchor="n")
         self.head_value_lbl = tk.Label(master=self.outfit_field, wraplength=WRAP_EQUIPMENT_VALUE_LBL, text="Корона", font=FONT_EQUIPMENT_VALUE_LBL, bg=COLOR_EQUIPMENT, height=2, anchor="n")
@@ -590,6 +575,7 @@ class DestinyQuest:
         self.notes_lbl.grid(row=2, column=0, columnspan=5, sticky="nsew", padx=2)
         self.notes_txt = tk.Text(master=self.backpack_field, height=3)
         self.notes_txt.grid(row=4, columnspan=5, sticky="nwse", padx=2, pady=2)
+
         #  Open equipment windows by click
         self.cloak_lbl.bind("<Button-1>", lambda e: self.open_equipment_window(self.cloak_lbl["text"]))
         self.cloak_value_lbl.bind("<Button-1>", lambda e: self.open_equipment_window(self.cloak_lbl["text"]))
@@ -622,14 +608,56 @@ class DestinyQuest:
         self.cell5_lbl.bind("<Button-1>", lambda e: self.open_equipment_window("Backpack cell 5:"))
 
 # =============================================================================================================================
+    # Словарь открытых окон для каждого оборудования. Чтобы окно для каждого оборудования открывалось 1 раз.
+    global opened_window
+    opened_window = {}
+    def open_equipment_window(self, equipment_cell_name):
+        """ Открыть одно новое окно для любой ячейки в обмундировании и рюкзаке """
+        equip = self.define_equipment(equipment_cell_name)
+        global opened_window
+        if equipment_cell_name not in opened_window.keys():
+            opened_window[equipment_cell_name] = 1
+            self.equipment_window = EquipmentWindow(equipment_cell_name, equip)
+            # Запретить пользователю взаимодействовать с основным окном
+            self.equipment_window.grab_set()
+            # При закрытие окна, чисть глобальную переменную
+            self.equipment_window.protocol("WM_DELETE_WINDOW", lambda: self.close_equipment_window(equipment_cell_name))
+
+    def close_equipment_window(self, equipment_cell_name):
+        """ При закрытие окна почистить гловабльную переменную, чтоб иметь возможность открывать окно снова """
+        global opened_window
+        opened_window.pop(equipment_cell_name)
+        self.equipment_window.destroy()
+
+    def define_equipment(self, equipment_cell_name):
+        """ Define all attributes of specific equipment """
+        equipment_cell_name = equipment_cell_name[:-1].lower()
+        equip_dict = {
+            "cloak" : {
+                "equipment_name" : self.player.cloak_name,
+                "equipment_type" : self.player.cloak_type,
+                "equipment_speed" : self.player.cloak_speed,
+                "equipment_brawn" : self.player.cloak_brawn,
+                "equipment_magic" : self.player.cloak_magic,
+                "equipment_armour" : self.player.cloak_armour
+            }
+        }
+        try:
+            equip = {}
+            equip = equip_dict[equipment_cell_name]
+        except Error:
+            pass
+
+        return equip
+
 class EquipmentWindow(tk.Toplevel):
     """ Class for creating a new window for any equipment cell """
-    def __init__(self, equipment_cell_name):
+    def __init__(self, equipment_cell_name, equip: dict):
         super().__init__()
         self.equipment_cell_name = equipment_cell_name
+        self.equip = equip
         self.title(f"Сharacteristics {self.equipment_cell_name}")
         self.resizable(False,False)
-
         self.init_gui()
 
     def init_gui(self):
@@ -661,8 +689,9 @@ class EquipmentWindow(tk.Toplevel):
         # Equipment stats
         self.equipment_name_lbl = tk.Label(self.equipment_stats_field, text="Name: ", font=FONT_STATS)
         self.equipment_name_lbl.grid(row=0, sticky="nw", columnspan=2)
-        self.equipment_name_ent = tk.Entry(self.equipment_stats_field, font=FONT_STATS)
+        self.equipment_name_ent = tk.Entry(self.equipment_stats_field, font=FONT_EQUIPMENT_VALUE_LBL)
         self.equipment_name_ent.grid(row=0, sticky="nw", column=2, columnspan=6)
+        self.equipment_name_ent.insert(0, self.equip["equipment_name"])
         self.equipment_speed_lbl = tk.Label(self.equipment_stats_field, text=f"{ICON_SPEED}", font=FONT_STATS)
         self.equipment_speed_lbl.grid(row=1, column=0, sticky="e")
         self.equipment_speed_ent = tk.Entry(self.equipment_stats_field, width=2, font=FONT_STATS)
@@ -680,7 +709,7 @@ class EquipmentWindow(tk.Toplevel):
         self.equipment_armour_ent = tk.Entry(self.equipment_stats_field, width=2, font=FONT_STATS)
         self.equipment_armour_ent.grid(row=1, column=7, sticky="ew")
         # Buttons
-        self.put_on_btn = tk.Button(master=self.buttons_field, text="Put on")
+        self.put_on_btn = tk.Button(master=self.buttons_field, text="Put on/Apply")
         self.throw_away_btn = tk.Button(master=self.buttons_field, text="Throw away")
         self.in_backpack_btn = tk.Button(master=self.buttons_field, text="In backpack")
         self.put_on_btn.grid(row=0, column=0, sticky="nsew", padx=5)
