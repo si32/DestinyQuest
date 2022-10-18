@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import ttk
 from tkinter.filedialog import askopenfilename, asksaveasfilename
 import random
 import json
@@ -631,20 +632,13 @@ class DestinyQuest:
 
     def define_equipment(self, equipment_cell_name):
         """ Define all attributes of specific equipment """
-        equipment_cell_name = equipment_cell_name[:-1].lower()
-        equip_dict = {
-            "cloak" : {
-                "equipment_name" : self.player.cloak_name,
-                "equipment_type" : self.player.cloak_type,
-                "equipment_speed" : self.player.cloak_speed,
-                "equipment_brawn" : self.player.cloak_brawn,
-                "equipment_magic" : self.player.cloak_magic,
-                "equipment_armour" : self.player.cloak_armour
-            }
-        }
+        equipment_cell_name = equipment_cell_name[:-1].lower().replace(" ", "_")
+        #  Объект player сириализуем в строку, потом эту строку в словарь питона
+        equip_dict = json.loads(json.dumps(self.player, default=Player.player_2_json,  ensure_ascii=False, indent=4))
         try:
             equip = {}
-            equip = equip_dict[equipment_cell_name]
+            equip = equip_dict["equipment"][equipment_cell_name]
+            print(equip)
         except Error:
             pass
 
@@ -672,8 +666,8 @@ class EquipmentWindow(tk.Toplevel):
         self.equipment_cell_name_field.columnconfigure(0, weight=1)
         # Create equipment_stats frame
         self.equipment_stats_field = tk.Frame(self.mainframe)
-        self.equipment_stats_field.rowconfigure([0, 1], weight=1)
-        self.equipment_stats_field.columnconfigure([0,1,2,3,4,5,6,7], weight=1)
+        self.equipment_stats_field.rowconfigure([0, 1, 2], weight=1)
+        self.equipment_stats_field.columnconfigure([0,1,2,3,4,5,6,7,8,9], weight=1)
         # Create buttons frame
         self.buttons_field = tk.Frame(self.mainframe)
         self.buttons_field.rowconfigure(0, weight=1)
@@ -687,27 +681,45 @@ class EquipmentWindow(tk.Toplevel):
         self.equipment_cell_name_lbl = tk.Label(master=self.equipment_cell_name_field, text=f"{self.equipment_cell_name[:-1]}", font=FONT_STATS)
         self.equipment_cell_name_lbl.grid(row=0, sticky="w")
         # Equipment stats
-        self.equipment_name_lbl = tk.Label(self.equipment_stats_field, text="Name: ", font=FONT_STATS)
+        self.equipment_name_lbl = tk.Label(self.equipment_stats_field, text="Name:", font=FONT_STATS)
         self.equipment_name_lbl.grid(row=0, sticky="nw", columnspan=2)
         self.equipment_name_ent = tk.Entry(self.equipment_stats_field, font=FONT_EQUIPMENT_VALUE_LBL)
         self.equipment_name_ent.grid(row=0, sticky="nw", column=2, columnspan=6)
         self.equipment_name_ent.insert(0, self.equip["equipment_name"])
+        self.equipment_type_lbl = tk.Label(self.equipment_stats_field, text="Type:", font=FONT_STATS)
+        self.equipment_type_lbl.grid(row=1, sticky="nw", columnspan=2)
+        self.equipment_type_lst = ttk.Combobox(self.equipment_stats_field,
+        values = [
+            "cloak", "head","gloves",
+            "ring", "necklace",
+            "right_hand", "chest", "left_hand",
+            "talisman", "feet",
+            "potion", "other"
+        ],
+        state="readonly"
+        )
+        self.equipment_type_lst.set(self.equip["equipment_type"])
+        self.equipment_type_lst.grid(row=1, sticky="nw", column=2, columnspan=4)
         self.equipment_speed_lbl = tk.Label(self.equipment_stats_field, text=f"{ICON_SPEED}", font=FONT_STATS)
-        self.equipment_speed_lbl.grid(row=1, column=0, sticky="e")
+        self.equipment_speed_lbl.grid(row=2, column=0, sticky="e")
         self.equipment_speed_ent = tk.Entry(self.equipment_stats_field, width=2, font=FONT_STATS)
-        self.equipment_speed_ent.grid(row=1, column=1, sticky="ew")
+        self.equipment_speed_ent.grid(row=2, column=1, sticky="ew")
         self.equipment_brawn_lbl = tk.Label(self.equipment_stats_field, text=f"{ICON_BRAWN}", font=FONT_STATS)
-        self.equipment_brawn_lbl.grid(row=1, column=2, sticky="e")
+        self.equipment_brawn_lbl.grid(row=2, column=2, sticky="e")
         self.equipment_brawn_ent = tk.Entry(self.equipment_stats_field, width=2, font=FONT_STATS)
-        self.equipment_brawn_ent.grid(row=1, column=3, sticky="ew")
+        self.equipment_brawn_ent.grid(row=2, column=3, sticky="ew")
         self.equipment_magic_lbl = tk.Label(self.equipment_stats_field, text=f"{ICON_MAGIC}", font=FONT_STATS)
-        self.equipment_magic_lbl.grid(row=1, column=4, sticky="e")
+        self.equipment_magic_lbl.grid(row=2, column=4, sticky="e")
         self.equipment_magic_ent = tk.Entry(self.equipment_stats_field, width=2, font=FONT_STATS)
-        self.equipment_magic_ent.grid(row=1, column=5, sticky="ew")
+        self.equipment_magic_ent.grid(row=2, column=5, sticky="ew")
         self.equipment_armour_lbl = tk.Label(self.equipment_stats_field, text=f"{ICON_ARMOUR}", font=FONT_STATS)
-        self.equipment_armour_lbl.grid(row=1, column=6, sticky="e")
+        self.equipment_armour_lbl.grid(row=2, column=6, sticky="e")
         self.equipment_armour_ent = tk.Entry(self.equipment_stats_field, width=2, font=FONT_STATS)
-        self.equipment_armour_ent.grid(row=1, column=7, sticky="ew")
+        self.equipment_armour_ent.grid(row=2, column=7, sticky="ew")
+        self.equipment_health_lbl = tk.Label(self.equipment_stats_field, text=f"{ICON_HEALTH}", fg="red", font=FONT_STATS)
+        self.equipment_health_lbl.grid(row=2, column=8, sticky="e")
+        self.equipment_health_ent = tk.Entry(self.equipment_stats_field, width=2, font=FONT_STATS)
+        self.equipment_health_ent.grid(row=2, column=9, sticky="ew")
         # Buttons
         self.put_on_btn = tk.Button(master=self.buttons_field, text="Put on/Apply")
         self.throw_away_btn = tk.Button(master=self.buttons_field, text="Throw away")
