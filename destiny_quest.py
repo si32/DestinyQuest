@@ -78,9 +78,12 @@ class DestinyQuest:
             return
         # Сохранять героя при открытии нового героя
         with open(filepath, "r", encoding='utf-8') as input_file:
-            self.player = Player(json.load(input_file))
-            self.mainframe.destroy()
-            self.init_gui()
+            try:
+                self.player = Player(json.load(input_file))
+                self.mainframe.destroy()
+                self.init_gui()
+            except KeyError:
+                warning_msg = tk.messagebox.showwarning(title="Error", message="Bad file format!")
 
     def save_file(self):
         filepath = asksaveasfilename(
@@ -97,7 +100,7 @@ class DestinyQuest:
 
     def close_app(self):
         """ Save hero stats closing the app """
-        confirm = tk.messagebox.askyesnocancel(title="Info", message="Save DestinyQuest hero list?", default="yes")
+        confirm = tk.messagebox.askyesnocancel(title="Info", message="Save current DestinyQuest hero list?", default="yes")
         if confirm:
             if self.save_file() == "saved":
                 self.root.destroy()
@@ -106,6 +109,18 @@ class DestinyQuest:
             return None
         else:
             self.root.destroy()
+
+    def open_hero(self):
+        """ Save hero before open a new one """
+        confirm = tk.messagebox.askyesnocancel(title="Info", message="Save current DestinyQuest hero list?", default="yes")
+        if confirm:
+            if self.save_file() == "saved":
+                self.open_file()
+        # If push "Cancell" button
+        elif confirm is None:
+            return None
+        else:
+            self.open_file()
 
 
 # =============================================================================================================================================
@@ -286,7 +301,7 @@ class DestinyQuest:
         """ Menu """
         self.menubar = tk.Menu(self.root)
         self.filemenu = tk.Menu(self.menubar, tearoff=0)
-        self.filemenu.add_command(label="Открыть", command=self.open_file)
+        self.filemenu.add_command(label="Открыть", command=self.open_hero)
         self.filemenu.add_command(label="Сохранить как...", command=self.save_file)
         self.menubar.add_cascade(label="Герой", menu=self.filemenu)
 
