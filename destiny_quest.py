@@ -55,11 +55,10 @@ class DestinyQuest:
         self.player = Player(empty_hero)
         # print(self.player.__dict__)
 
-
         self.init_gui()
 
         # Сохранять героя при закрытии приложения
-        # self.root.protocol("WM_DELETE_WINDOW", callback)
+        self.root.protocol("WM_DELETE_WINDOW", self.close_app)
 
     # Initialize GUI
     def init_gui(self):
@@ -90,9 +89,24 @@ class DestinyQuest:
         initialdir=".\SaveData",
         )
         if not filepath:
-            return
+            return None
+
         with open(filepath, "w", encoding='utf-8') as output_file:
             json.dump(self.player, output_file, default=Player.player_2_json,  ensure_ascii=False, indent=4)
+        return "saved"
+
+    def close_app(self):
+        """ Save hero stats closing the app """
+        confirm = tk.messagebox.askyesnocancel(title="Info", message="Save DestinyQuest hero list?", default="yes")
+        if confirm:
+            if self.save_file() == "saved":
+                self.root.destroy()
+        # If push "Cancell" button
+        elif confirm is None:
+            return None
+        else:
+            self.root.destroy()
+
 
 # =============================================================================================================================================
     def refresh_result(self):
@@ -632,6 +646,7 @@ class DestinyQuest:
 
     def define_equipment(self, equipment_cell_name):
         """ Define all attributes of specific equipment """
+        # Из леЙбла ячеки сделать ключ для словаря
         equipment_cell_name = equipment_cell_name[:-1].lower().replace(" ", "_")
         #  Объект player сириализуем в строку, потом эту строку в словарь питона
         equip_dict = json.loads(json.dumps(self.player, default=Player.player_2_json,  ensure_ascii=False, indent=4))
