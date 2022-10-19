@@ -122,7 +122,6 @@ class DestinyQuest:
         else:
             self.open_file()
 
-
 # =============================================================================================================================================
     def refresh_result(self):
         """ Обновить результаты подсчетов """
@@ -206,6 +205,10 @@ class DestinyQuest:
     def update_hero_stats(self):
         # self.stats_hero_field.destroy()
         # self.stats_hero_field.__init__()
+        pass
+
+    def update_hero(self, package: dict):
+        # распокавать пакет апдейта и сохранить в селф плеер
         pass
 
 
@@ -647,11 +650,13 @@ class DestinyQuest:
         global opened_window
         if equipment_cell_name not in opened_window.keys():
             opened_window[equipment_cell_name] = 1
-            self.equipment_window = EquipmentWindow(equipment_cell_name, equip)
+            self.equipment_window = EquipmentWindow(self.player, equip)
             # Запретить пользователю взаимодействовать с основным окном
             self.equipment_window.grab_set()
             # При закрытие окна, чисть глобальную переменную
             self.equipment_window.protocol("WM_DELETE_WINDOW", lambda: self.close_equipment_window(equipment_cell_name))
+            # Реагировать только на событие дестроя всего окна, а не каждого его виджета
+            self.equipment_window.bind("<Destroy>", lambda e:self.close_equipment_window(equipment_cell_name) if e.widget == self.equipment_window else None)
 
     def close_equipment_window(self, equipment_cell_name):
         """ При закрытие окна почистить гловабльную переменную, чтоб иметь возможность открывать окно снова """
@@ -668,21 +673,44 @@ class DestinyQuest:
         try:
             equip = {}
             equip = equip_dict["equipment"][equipment_cell_name]
-            print(equip)
+            # print(equip)
         except Error:
             pass
 
         return equip
 
+
 class EquipmentWindow(tk.Toplevel):
     """ Class for creating a new window for any equipment cell """
-    def __init__(self, equipment_cell_name, equip: dict):
+    def __init__(self, player, equip: dict):
         super().__init__()
-        self.equipment_cell_name = equipment_cell_name
+        self.player = player
         self.equip = equip
-        self.title(f"Сharacteristics {self.equipment_cell_name}")
+        self.title(f"Сharacteristics {self.equip['equipment_type']}")
         self.resizable(False,False)
         self.init_gui()
+
+    def operate_puton_apply_btn(self, equip: dict):
+            """ Обработка нажатия кнопки "Put on\Apply" """
+            # Collect data to update package
+            self.update_package = {}
+            self.update_package["equipment_name"] = self.equipment_name_ent.get()
+            self.update_package["equipment_type"] = self.equipment_type_lst.get()
+            self.update_package["equipment_speed"] = self.equipment_speed_ent.get()
+            self.update_package["equipment_brawn"] = self.equipment_brawn_ent.get()
+            self.update_package["equipment_magic"] = self.equipment_magic_ent.get()
+            self.update_package["equipment_armour"] = self.equipment_armour_ent.get()
+            self.update_package["equipment_health"] = self.equipment_health_ent.get()
+
+            puton_values = ["cloak", "head", "gloves", "ring", "necklace", "right_hand", "chest", "left_hand", "talisman", "feet"]
+            if self.update_package["equipment_type"] in puton_values:
+                # кольца может быть надето только два !!! мы передалт плеера, поэтому можно спросить у него есть ли место. Если нет информационное окно
+                if self.player.update_player(self.update_package, permanently=True):
+                    self.destroy()
+            else:
+                if self.player.update_player(self.update_package, permanently=False):
+                    self.destroy()
+
 
     def init_gui(self):
         """ Create window GUI """
@@ -708,7 +736,7 @@ class EquipmentWindow(tk.Toplevel):
         self.equipment_stats_field.grid(row=1, sticky="nsew", padx=5, pady=5)
         self.buttons_field.grid(row=2, sticky="nsew", padx=5, pady=(10,5))
         # Equipment cell name label
-        self.equipment_cell_name_lbl = tk.Label(master=self.equipment_cell_name_field, text=f"{self.equipment_cell_name[:-1]}", font=FONT_STATS)
+        self.equipment_cell_name_lbl = tk.Label(master=self.equipment_cell_name_field, text=f"{self.equip['equipment_type'].title()}:", font=FONT_STATS)
         self.equipment_cell_name_lbl.grid(row=0, sticky="w")
         # Equipment stats
         self.equipment_name_lbl = tk.Label(self.equipment_stats_field, text="Name:", font=FONT_STATS)
@@ -733,35 +761,44 @@ class EquipmentWindow(tk.Toplevel):
         self.equipment_speed_lbl = tk.Label(self.equipment_stats_field, text=f"{ICON_SPEED}", font=FONT_STATS)
         self.equipment_speed_lbl.grid(row=2, column=0, sticky="e")
         self.equipment_speed_ent = tk.Entry(self.equipment_stats_field, width=2, font=FONT_STATS)
+        self.equipment_speed_ent.insert(0, self.equip["equipment_speed"])
         self.equipment_speed_ent.grid(row=2, column=1, sticky="ew")
         self.equipment_brawn_lbl = tk.Label(self.equipment_stats_field, text=f"{ICON_BRAWN}", font=FONT_STATS)
         self.equipment_brawn_lbl.grid(row=2, column=2, sticky="e")
         self.equipment_brawn_ent = tk.Entry(self.equipment_stats_field, width=2, font=FONT_STATS)
+        self.equipment_brawn_ent.insert(0, self.equip["equipment_brawn"])
         self.equipment_brawn_ent.grid(row=2, column=3, sticky="ew")
         self.equipment_magic_lbl = tk.Label(self.equipment_stats_field, text=f"{ICON_MAGIC}", font=FONT_STATS)
         self.equipment_magic_lbl.grid(row=2, column=4, sticky="e")
         self.equipment_magic_ent = tk.Entry(self.equipment_stats_field, width=2, font=FONT_STATS)
+        self.equipment_magic_ent.insert(0, self.equip["equipment_magic"])
         self.equipment_magic_ent.grid(row=2, column=5, sticky="ew")
         self.equipment_armour_lbl = tk.Label(self.equipment_stats_field, text=f"{ICON_ARMOUR}", font=FONT_STATS)
         self.equipment_armour_lbl.grid(row=2, column=6, sticky="e")
         self.equipment_armour_ent = tk.Entry(self.equipment_stats_field, width=2, font=FONT_STATS)
+        self.equipment_armour_ent.insert(0, self.equip["equipment_armour"])
         self.equipment_armour_ent.grid(row=2, column=7, sticky="ew")
         self.equipment_health_lbl = tk.Label(self.equipment_stats_field, text=f"{ICON_HEALTH}", fg="red", font=FONT_STATS)
         self.equipment_health_lbl.grid(row=2, column=8, sticky="e")
         self.equipment_health_ent = tk.Entry(self.equipment_stats_field, width=2, font=FONT_STATS)
+        self.equipment_health_ent.insert(0, self.equip["equipment_health"])
         self.equipment_health_ent.grid(row=2, column=9, sticky="ew")
         # Buttons
-        self.put_on_btn = tk.Button(master=self.buttons_field, text="Put on/Apply")
+        self.put_on_btn = tk.Button(master=self.buttons_field, text="Put on/Apply", command=lambda:self.operate_puton_apply_btn(self.equip))
         self.throw_away_btn = tk.Button(master=self.buttons_field, text="Throw away")
         self.in_backpack_btn = tk.Button(master=self.buttons_field, text="In backpack")
         self.put_on_btn.grid(row=0, column=0, sticky="nsew", padx=5)
         self.throw_away_btn.grid(row=0, column=1, sticky="nsew", padx=5)
         self.in_backpack_btn.grid(row=0, column=2, sticky="nsew", padx=5)
 
+
+
+
 # =============================================================================================================================
 def main():
     root = tk.Tk()
     DestinyQuest(root)
+    # print(dq.__dict__)
     root.mainloop()
 
 if __name__ == "__main__":
