@@ -197,20 +197,9 @@ class DestinyQuest:
             self.enemy_health_ent.insert(0, str(self.health - self.damage))
             # Применить специальные способности
 
-
     def update_all_labels(self):
         # Может сделать одну функцию, которая убивает класс всей программы и создаеь новый, чтобы все обновилось, а как сохранить все что наиграл?
         pass
-
-    # def update_hero_stats(self):
-    #     self.stats_hero_field.destroy()
-    #     self.stats_hero_field.__init__()
-
-
-    def update_hero(self, package: dict):
-        # распокавать пакет апдейта и сохранить в селф плеер
-        pass
-
 
     def get_result(self, dices, player, test):
         """ Подсчитать результат после броска кубиков с учетом модификаторов """
@@ -355,6 +344,13 @@ class DestinyQuest:
         # Чтобы отодвинуть колонки статистики врага
         self.empty_lbl = tk.Label(self.stats_hero_field, text="", width=7).grid(row=1, column=11)
         self.empty_lbl = tk.Label(self.stats_hero_field, text="", width=7).grid(row=2, column=11)
+        # tests characteristics
+        self.hero_speed_lbl.bind("<Button-1>", lambda e: self.get_result(dices=2, player="hero", test="speed"))
+        self.hero_brawn_lbl.bind("<Button-1>", lambda e: self.get_result(dices=2, player="hero", test="brawn"))
+        self.hero_magic_lbl.bind("<Button-1>", lambda e: self.get_result(dices=2, player="hero", test="magic"))
+        self.hero_armour_lbl.bind("<Button-1>", lambda e: self.get_result(dices=2, player="hero", test="armour"))
+        # refresh hero health after battle
+        self.hero_health_lbl.bind("<Button-1>", lambda e: self.refresh_hero_health())
 
     def create_stats_enemy_field(self):
         self.stats_enemy_field = tk.Frame(self.stats_field)
@@ -391,6 +387,8 @@ class DestinyQuest:
         self.enemy_health_lbl.grid(row=2, column=8, sticky="e")
         self.enemy_health_ent = tk.Entry(self.stats_enemy_field, width=2, font=FONT_STATS)
         self.enemy_health_ent.grid(row=2, column=9, sticky="ew")
+        # refresh enemy stats after battle
+        self.enemy_name_lbl.bind("<Button-1>", lambda e: self.refresh_enemy())
 
     def create_stats_field(self):
         """ Top general statistic field """
@@ -403,15 +401,6 @@ class DestinyQuest:
         self.stats_field.grid(row=0, sticky="nsew")
         self.create_stats_hero_field()
         self.create_stats_enemy_field()
-        # tests characteristics
-        self.hero_speed_lbl.bind("<Button-1>", lambda e: self.get_result(dices=2, player="hero", test="speed"))
-        self.hero_brawn_lbl.bind("<Button-1>", lambda e: self.get_result(dices=2, player="hero", test="brawn"))
-        self.hero_magic_lbl.bind("<Button-1>", lambda e: self.get_result(dices=2, player="hero", test="magic"))
-        self.hero_armour_lbl.bind("<Button-1>", lambda e: self.get_result(dices=2, player="hero", test="armour"))
-        # refresh hero health after battle
-        self.hero_health_lbl.bind("<Button-1>", lambda e: self.refresh_hero_health())
-        # refresh enemy stats after battle
-        self.enemy_name_lbl.bind("<Button-1>", lambda e: self.refresh_enemy())
 
 # =============================================================================================================================================
     def create_dices_field(self):
@@ -652,7 +641,12 @@ class DestinyQuest:
         global opened_window
         if equipment_cell_name not in opened_window.keys():
             opened_window[equipment_cell_name] = 1
-            self.equipment_window = EquipmentWindow(self.player, equip)
+            # Если у героя нет еще оборудования, то на редактирование, а так только на посмотреть
+            if equip["equipment_name"] == "":
+                self.equipment_window = EquipmentWindow(self.player, equip, "active")
+            else:
+                self.equipment_window = EquipmentWindow(self.player, equip, "disabled")
+
             # Запретить пользователю взаимодействовать с основным окном
             self.equipment_window.grab_set()
             # При закрытие окна, чисть глобальную переменную
@@ -663,9 +657,12 @@ class DestinyQuest:
     def close_equipment_window(self, equipment_cell_name):
         """ При закрытие окна почистить гловабльную переменную, чтоб иметь возможность открывать окно снова """
         global opened_window
-        opened_window.pop(equipment_cell_name)
+        if equipment_cell_name in opened_window:
+            opened_window.pop(equipment_cell_name)
         self.equipment_window.destroy()
+        # Update windows fields
         self.create_stats_hero_field()
+        self.create_equipment_field()
 
     def define_equipment(self, equipment_cell_name):
         """ Define all attributes of specific equipment """
@@ -676,43 +673,75 @@ class DestinyQuest:
         try:
             equip = {}
             equip = equip_dict["equipment"][equipment_cell_name]
-            # print(equip)
         except Error:
             pass
-
         return equip
 
 
 class EquipmentWindow(tk.Toplevel):
     """ Class for creating a new window for any equipment cell """
-    def __init__(self, player, equip: dict):
+    def __init__(self, player, equip: dict, state="active"):
         super().__init__()
         self.player = player
         self.equip = equip
+        self.state = state
         self.title(f"Сharacteristics {self.equip['equipment_type']}")
         self.resizable(False,False)
         self.init_gui()
 
-    def operate_puton_apply_btn(self, equip: dict):
-            """ Обработка нажатия кнопки "Put on\Apply" """
-            # Collect data to update package
-            self.update_package = {}
-            self.update_package["equipment_name"] = self.equipment_name_ent.get()
-            self.update_package["equipment_type"] = self.equipment_type_lst.get()
-            self.update_package["equipment_speed"] = self.equipment_speed_ent.get()
-            self.update_package["equipment_brawn"] = self.equipment_brawn_ent.get()
-            self.update_package["equipment_magic"] = self.equipment_magic_ent.get()
-            self.update_package["equipment_armour"] = self.equipment_armour_ent.get()
-            self.update_package["equipment_health"] = self.equipment_health_ent.get()
+    def activate_state(self, state):
+        self.state = state
+        if self.state == "disabled":
+            for child in self.equipment_stats_field.winfo_children():
+                child.configure(state="disabled")
+        elif self.state == "active":
+            for child in self.equipment_stats_field.winfo_children():
+                child.configure(state="normal")
 
-            puton_values = ["cloak", "head", "gloves", "ring", "necklace", "right_hand", "chest", "left_hand", "talisman", "feet"]
-            if self.update_package["equipment_type"] in puton_values:
-                # кольца может быть надето только два !!! мы передалт плеера, поэтому можно спросить у него есть ли место. Если нет информационное окно
-                if self.player.update_player(self.update_package, permanently=True, direction="plus"):
-                    self.destroy()
+    def delete_equipment(self):
+        """ Delete information about equipment in equipment window """
+        self.equipment_name_ent.delete(0, tk.END)
+        self.equipment_type_lst.set(self.equip["equipment_type"])
+        self.equipment_speed_ent.delete(0, tk.END)
+        self.equipment_brawn_ent.delete(0, tk.END)
+        self.equipment_magic_ent.delete(0, tk.END)
+        self.equipment_armour_ent.delete(0, tk.END)
+        self.equipment_health_ent.delete(0, tk.END)
+
+    def get_update_package(self):
+        # Collect data to update package
+        self.update_package = {}
+        self.update_package["equipment_name"] = self.equipment_name_ent.get()
+        self.update_package["equipment_type"] = self.equipment_type_lst.get()
+        self.update_package["equipment_speed"] = self.equipment_speed_ent.get()
+        self.update_package["equipment_brawn"] = self.equipment_brawn_ent.get()
+        self.update_package["equipment_magic"] = self.equipment_magic_ent.get()
+        self.update_package["equipment_armour"] = self.equipment_armour_ent.get()
+        self.update_package["equipment_health"] = self.equipment_health_ent.get()
+        return self.update_package
+
+    def operate_puton_apply_btn(self):
+            """ Обработка нажатия кнопки "Put on\Apply" """
+            if self.state == "active":
+                self.update_package = self.get_update_package()
+                puton_values = ["cloak", "head", "gloves", "ring", "necklace", "right_hand", "chest", "left_hand", "talisman", "feet"]
+                if self.update_package["equipment_type"] in puton_values:
+                    if self.player.update_player(self.update_package, permanently=True, direction="plus"):
+                        self.destroy()
+                else:
+                    if self.player.update_player(self.update_package, permanently=False, direction="plus"):
+                        self.destroy()
             else:
-                if self.player.update_player(self.update_package, permanently=False, direction="plus"):
-                    self.destroy()
+                self.destroy()
+
+    def operate_throw_away_btn(self):
+            """ Обработка нажатия кнопки "Throw away" """
+            self.update_package  = self.get_update_package()
+            self.player.update_characteristics(self.update_package, direction="minus")
+            self.player.throw_away_equipment(self.update_package["equipment_type"])
+            self.activate_state("active")
+            self.delete_equipment()
+            print("delete done!")
 
 
     def init_gui(self):
@@ -745,7 +774,7 @@ class EquipmentWindow(tk.Toplevel):
         self.equipment_name_lbl = tk.Label(self.equipment_stats_field, text="Name:", font=FONT_STATS)
         self.equipment_name_lbl.grid(row=0, sticky="nw", columnspan=2)
         self.equipment_name_ent = tk.Entry(self.equipment_stats_field, font=FONT_EQUIPMENT_VALUE_LBL)
-        self.equipment_name_ent.grid(row=0, sticky="nw", column=2, columnspan=6)
+        self.equipment_name_ent.grid(row=0, sticky="nwe", column=2, columnspan=8)
         self.equipment_name_ent.insert(0, self.equip["equipment_name"])
         self.equipment_type_lbl = tk.Label(self.equipment_stats_field, text="Type:", font=FONT_STATS)
         self.equipment_type_lbl.grid(row=1, sticky="nw", columnspan=2)
@@ -787,12 +816,15 @@ class EquipmentWindow(tk.Toplevel):
         self.equipment_health_ent.insert(0, self.equip["equipment_health"])
         self.equipment_health_ent.grid(row=2, column=9, sticky="ew")
         # Buttons
-        self.put_on_btn = tk.Button(master=self.buttons_field, text="Put on/Apply", command=lambda:self.operate_puton_apply_btn(self.equip))
-        self.throw_away_btn = tk.Button(master=self.buttons_field, text="Throw away")
+        self.put_on_btn = tk.Button(master=self.buttons_field, text="Put on/Apply", command=self.operate_puton_apply_btn)
+        self.throw_away_btn = tk.Button(master=self.buttons_field, text="Throw away", command=self.operate_throw_away_btn)
         self.in_backpack_btn = tk.Button(master=self.buttons_field, text="In backpack")
         self.put_on_btn.grid(row=0, column=0, sticky="nsew", padx=5)
         self.throw_away_btn.grid(row=0, column=1, sticky="nsew", padx=5)
         self.in_backpack_btn.grid(row=0, column=2, sticky="nsew", padx=5)
+        # Activate state of window
+        self.activate_state(self.state)
+
 
 
 

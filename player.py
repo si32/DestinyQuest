@@ -362,8 +362,19 @@ class Player:
 		self.backpack_cell_5_health = hero["equipment"]["backpack_cell_5"]["equipment_health"]
 		self.notes = hero["notes"]
 
-# Можно написать еще функцию валидации пакета
+	# Можно написать еще функцию валидации пакета
+	def validate_update_package(self, update_package):
+		self.update_package = update_package
+		for key, value in self.update_package.items():
+			if key in ("equipment_speed", "equipment_brawn", "equipment_magic", "equipment_armour", "equipment_health"):
+				try:
+					self.update_package[key] = int(value)
+				except ValueError:
+					self.update_package[key] = 0
+		return self.update_package
+
 	def update_characteristics(self, update_package: dict, direction: ["plus", "minus"]):
+		self.update_package = self.validate_update_package(update_package)
 		if direction == "plus":
 			self.speed += int(update_package["equipment_speed"])
 			self.brawn += int(update_package["equipment_brawn"])
@@ -379,6 +390,16 @@ class Player:
 		else:
 			raise Exception("Wrong direction attribute value!")
 
+	def throw_away_equipment(self, equipment_type):
+		if equipment_type == "cloak":
+			self.cloak_name = ""
+			self.cloak_type = "cloak"
+			self.cloak_speed = 0
+			self.cloak_brawn = 0
+			self.cloak_magic = 0
+			self.cloak_armour = 0
+			self.cloak_health = 0
+
 	def update_player(self, update_package:dict, permanently: bool, direction: ["plus", "minus"]):
 		""" Update player. Permanently(put on equipment) or not(drink potion) """
 		if permanently:
@@ -386,10 +407,16 @@ class Player:
 				self.update_characteristics(update_package, direction)
 				self.cloak_name = update_package["equipment_name"]
 				self.cloak_type = update_package["equipment_type"]
+				self.cloak_speed = update_package["equipment_speed"]
+				self.cloak_brawn = update_package["equipment_brawn"]
+				self.cloak_magic = update_package["equipment_magic"]
+				self.cloak_armour = update_package["equipment_armour"]
+				self.cloak_health = update_package["equipment_health"]
+
 		else:
 			self.update_characteristics(update_package, direction)
-			self.cloak_name = ""
-			self.cloak_type = ""
+			# self.cloak_name = ""
+			# self.cloak_type = ""
 		return True
 
 	def player_2_json(self):
