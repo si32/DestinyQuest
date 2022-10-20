@@ -363,23 +363,33 @@ class Player:
 		self.notes = hero["notes"]
 
 # Можно написать еще функцию валидации пакета
-	def update_characteristics(self, update_package: dict):
-		self.speed += int(update_package["equipment_speed"])
-		self.brawn += int(update_package["equipment_brawn"])
-		self.magic += int(update_package["equipment_magic"])
-		self.armour += int(update_package["equipment_armour"])
-		self.health += int(update_package["equipment_health"])
+	def update_characteristics(self, update_package: dict, direction: ["plus", "minus"]):
+		if direction == "plus":
+			self.speed += int(update_package["equipment_speed"])
+			self.brawn += int(update_package["equipment_brawn"])
+			self.magic += int(update_package["equipment_magic"])
+			self.armour += int(update_package["equipment_armour"])
+			self.health += int(update_package["equipment_health"])
+		elif direction == "minus":
+			self.speed -= int(update_package["equipment_speed"])
+			self.brawn -= int(update_package["equipment_brawn"])
+			self.magic -= int(update_package["equipment_magic"])
+			self.armour -= int(update_package["equipment_armour"])
+			self.health -= int(update_package["equipment_health"])
+		else:
+			raise Exception("Wrong direction attribute value!")
 
-
-	def update_player(self, update_package:dict, permanently: bool):
+	def update_player(self, update_package:dict, permanently: bool, direction: ["plus", "minus"]):
 		""" Update player. Permanently(put on equipment) or not(drink potion) """
 		if permanently:
 			if update_package["equipment_type"] == "cloak":
-				self.update_characteristics(update_package)
+				self.update_characteristics(update_package, direction)
 				self.cloak_name = update_package["equipment_name"]
 				self.cloak_type = update_package["equipment_type"]
 		else:
-			self.update_characteristics(update_package)
+			self.update_characteristics(update_package, direction)
+			self.cloak_name = ""
+			self.cloak_type = ""
 		return True
 
 	def player_2_json(self):

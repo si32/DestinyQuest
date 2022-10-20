@@ -202,10 +202,10 @@ class DestinyQuest:
         # Может сделать одну функцию, которая убивает класс всей программы и создаеь новый, чтобы все обновилось, а как сохранить все что наиграл?
         pass
 
-    def update_hero_stats(self):
-        # self.stats_hero_field.destroy()
-        # self.stats_hero_field.__init__()
-        pass
+    # def update_hero_stats(self):
+    #     self.stats_hero_field.destroy()
+    #     self.stats_hero_field.__init__()
+
 
     def update_hero(self, package: dict):
         # распокавать пакет апдейта и сохранить в селф плеер
@@ -317,24 +317,11 @@ class DestinyQuest:
         self.mainframe.columnconfigure(0, weight=1)
         self.mainframe.grid(padx=3)
 
-    def create_stats_field(self):
-        """ Top general statistic field """
-        # Frames
-        self.stats_field = tk.Frame(self.mainframe)
-        self.stats_field.rowconfigure(0, weight=1)
-        self.stats_field.columnconfigure(0, weight=1)
-        # какая строка верх или низ правильная?
-        self.stats_field.columnconfigure(1, weight=1)
+    def create_stats_hero_field(self):
         self.stats_hero_field = tk.Frame(self.stats_field)
-        self.stats_enemy_field = tk.Frame(self.stats_field)
         self.stats_hero_field.rowconfigure([0, 1, 2], weight=1)
         self.stats_hero_field.columnconfigure([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], weight=1)
-        self.stats_enemy_field.rowconfigure([0, 1, 2], weight=1)
-        self.stats_enemy_field.columnconfigure([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], weight=1)
-        self.stats_field.grid(row=0, sticky="nsew")
         self.stats_hero_field.grid(row=0, column=0, sticky="nsew")
-        self.stats_enemy_field.grid(row=0, column=1, sticky="nsew", padx=2)
-
         # Widgets❤️
         self.hero_name_icon_lbl = tk.Label(self.stats_hero_field, text=f"{ICON_HERO}", fg="blue", font=FONT_STATS)
         self.hero_name_lbl = tk.Label(self.stats_hero_field, text=f"{self.player.name}", fg="blue", font=FONT_STATS)
@@ -345,7 +332,6 @@ class DestinyQuest:
         self.hero_career_lbl = tk.Label(self.stats_hero_field, text=f"{self.player.career}", font=FONT_STATS)
         self.hero_path_lbl.grid(row=1, column=0, columnspan=5, sticky="w")
         self.hero_career_lbl.grid(row=1, column=4, columnspan=5, sticky="w")
-
         self.hero_speed_icon_lbl = tk.Label(self.stats_hero_field, text=f"{ICON_SPEED}", font=FONT_STATS)
         self.hero_speed_lbl = tk.Label(self.stats_hero_field, text=f"{self.player.speed}", font=FONT_STATS)
         self.hero_speed_icon_lbl.grid(row=2, column=0, sticky="e")
@@ -370,6 +356,11 @@ class DestinyQuest:
         self.empty_lbl = tk.Label(self.stats_hero_field, text="", width=7).grid(row=1, column=11)
         self.empty_lbl = tk.Label(self.stats_hero_field, text="", width=7).grid(row=2, column=11)
 
+    def create_stats_enemy_field(self):
+        self.stats_enemy_field = tk.Frame(self.stats_field)
+        self.stats_enemy_field.rowconfigure([0, 1, 2], weight=1)
+        self.stats_enemy_field.columnconfigure([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], weight=1)
+        self.stats_enemy_field.grid(row=0, column=1, sticky="nsew", padx=2)
         self.enemy_name_lbl = tk.Label(self.stats_enemy_field, text=f"{ICON_ENEMY} Враг", fg="red", font=FONT_STATS)
         self.enemy_name_lbl.grid(row=0, column=0, columnspan=10, sticky="e")
 
@@ -401,6 +392,17 @@ class DestinyQuest:
         self.enemy_health_ent = tk.Entry(self.stats_enemy_field, width=2, font=FONT_STATS)
         self.enemy_health_ent.grid(row=2, column=9, sticky="ew")
 
+    def create_stats_field(self):
+        """ Top general statistic field """
+        # Frames
+        self.stats_field = tk.Frame(self.mainframe)
+        self.stats_field.rowconfigure(0, weight=1)
+        self.stats_field.columnconfigure(0, weight=1)
+        # какая строка верх или низ правильная?
+        self.stats_field.columnconfigure(1, weight=1)
+        self.stats_field.grid(row=0, sticky="nsew")
+        self.create_stats_hero_field()
+        self.create_stats_enemy_field()
         # tests characteristics
         self.hero_speed_lbl.bind("<Button-1>", lambda e: self.get_result(dices=2, player="hero", test="speed"))
         self.hero_brawn_lbl.bind("<Button-1>", lambda e: self.get_result(dices=2, player="hero", test="brawn"))
@@ -663,6 +665,7 @@ class DestinyQuest:
         global opened_window
         opened_window.pop(equipment_cell_name)
         self.equipment_window.destroy()
+        self.create_stats_hero_field()
 
     def define_equipment(self, equipment_cell_name):
         """ Define all attributes of specific equipment """
@@ -705,10 +708,10 @@ class EquipmentWindow(tk.Toplevel):
             puton_values = ["cloak", "head", "gloves", "ring", "necklace", "right_hand", "chest", "left_hand", "talisman", "feet"]
             if self.update_package["equipment_type"] in puton_values:
                 # кольца может быть надето только два !!! мы передалт плеера, поэтому можно спросить у него есть ли место. Если нет информационное окно
-                if self.player.update_player(self.update_package, permanently=True):
+                if self.player.update_player(self.update_package, permanently=True, direction="plus"):
                     self.destroy()
             else:
-                if self.player.update_player(self.update_package, permanently=False):
+                if self.player.update_player(self.update_package, permanently=False, direction="plus"):
                     self.destroy()
 
 
