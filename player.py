@@ -365,34 +365,6 @@ class Player:
 		self.armour = self.original_armour + self.cloak_armour + self.head_armour + self.gloves_armour + self.ring_1_armour + self.necklace_armour + self.ring_2_armour + self.right_hand_armour + self.chest_armour + self.left_hand_armour + self.talisman_armour + self.feet_armour
 		self.health = self.original_health + self.cloak_health + self.head_health + self.gloves_health + self.ring_1_health + self.necklace_health + self.ring_2_health + self.right_hand_health + self.chest_health + self.left_hand_health + self.talisman_health + self.feet_health
 
-	def validate_update_package(self, update_package):
-		# Validation update_package
-		self.update_package = update_package
-		for key, value in self.update_package.items():
-			if key in ("equipment_speed", "equipment_brawn", "equipment_magic", "equipment_armour", "equipment_health"):
-				try:
-					self.update_package[key] = int(value)
-				except ValueError:
-					self.update_package[key] = 0
-		return self.update_package
-
-	def update_characteristics(self, update_package: dict, direction: ["plus", "minus"]):
-		self.update_package = self.validate_update_package(update_package)
-		if direction == "plus":
-			self.speed += int(update_package["equipment_speed"])
-			self.brawn += int(update_package["equipment_brawn"])
-			self.magic += int(update_package["equipment_magic"])
-			self.armour += int(update_package["equipment_armour"])
-			self.health += int(update_package["equipment_health"])
-		elif direction == "minus":
-			self.speed -= int(update_package["equipment_speed"])
-			self.brawn -= int(update_package["equipment_brawn"])
-			self.magic -= int(update_package["equipment_magic"])
-			self.armour -= int(update_package["equipment_armour"])
-			self.health -= int(update_package["equipment_health"])
-		else:
-			raise Exception("Wrong direction attribute value!")
-
 	def throw_away_equipment(self, equipment_type):
 		if equipment_type == "cloak":
 			self.cloak_name = ""
@@ -403,65 +375,59 @@ class Player:
 			self.cloak_armour = 0
 			self.cloak_health = 0
 
-	def update_player(self, update_package:dict, package_type):
-		""" Update player. Permanently(put on equipment) or not(drink potion) """
-		self.package_type = package_type
-		try:
-			if self.package_type == "equipment":
-				if update_package["equipment_type"] == "cloak":
-					self.cloak_name = update_package["equipment_name"]
-					self.cloak_type = update_package["equipment_type"]
-					self.cloak_speed = update_package["equipment_speed"]
-					self.cloak_brawn = update_package["equipment_brawn"]
-					self.cloak_magic = update_package["equipment_magic"]
-					self.cloak_armour = update_package["equipment_armour"]
-					self.cloak_health = update_package["equipment_health"]
-				else:
-					raise(f'Unknown type of equipment {update_package["equipment_type"]}')
-			# Если это не оборудование значит все остальное в рюкзак
-			elif self.package_type == "backpack_cell_1":
-				self.backpack_cell_1_name = update_package["equipment_name"]
-				self.backpack_cell_1_type = update_package["equipment_type"]
-				self.backpack_cell_1_speed = update_package["equipment_speed"]
-				self.backpack_cell_1_brawn = update_package["equipment_brawn"]
-				self.backpack_cell_1_magic = update_package["equipment_magic"]
-				self.backpack_cell_1_armour = update_package["equipment_armour"]
-				self.backpack_cell_1_health = update_package["equipment_health"]
-			elif self.package_type == "backpack_cell_2":
-				self.backpack_cell_2_name = update_package["equipment_name"]
-				self.backpack_cell_2_type = update_package["equipment_type"]
-				self.backpack_cell_2_speed = update_package["equipment_speed"]
-				self.backpack_cell_2_brawn = update_package["equipment_brawn"]
-				self.backpack_cell_2_magic = update_package["equipment_magic"]
-				self.backpack_cell_2_armour = update_package["equipment_armour"]
-				self.backpack_cell_2_health = update_package["equipment_health"]
-			elif self.package_type == "backpack_cell_3":
-				self.backpack_cell_3_name = update_package["equipment_name"]
-				self.backpack_cell_3_type = update_package["equipment_type"]
-				self.backpack_cell_3_speed = update_package["equipment_speed"]
-				self.backpack_cell_3_brawn = update_package["equipment_brawn"]
-				self.backpack_cell_3_magic = update_package["equipment_magic"]
-				self.backpack_cell_3_armour = update_package["equipment_armour"]
-				self.backpack_cell_3_health = update_package["equipment_health"]
-			elif self.package_type == "backpack_cell_4":
-				self.backpack_cell_4_name = update_package["equipment_name"]
-				self.backpack_cell_4_type = update_package["equipment_type"]
-				self.backpack_cell_4_speed = update_package["equipment_speed"]
-				self.backpack_cell_4_brawn = update_package["equipment_brawn"]
-				self.backpack_cell_4_magic = update_package["equipment_magic"]
-				self.backpack_cell_4_armour = update_package["equipment_armour"]
-				self.backpack_cell_4_health = update_package["equipment_health"]
-			elif self.package_type == "backpack_cell_5":
-				self.backpack_cell_5_name = update_package["equipment_name"]
-				self.backpack_cell_5_type = update_package["equipment_type"]
-				self.backpack_cell_5_speed = update_package["equipment_speed"]
-				self.backpack_cell_5_brawn = update_package["equipment_brawn"]
-				self.backpack_cell_5_magic = update_package["equipment_magic"]
-				self.backpack_cell_5_armour = update_package["equipment_armour"]
-				self.backpack_cell_5_health = update_package["equipment_health"]
-		except ValueError:
-			print(f'Unknown type of package {self.package_type}')
+	def update_player(self, id_cell, update_package:dict):
+		""" Update player equipment """
+		if id_cell == "cloak":
+			self.cloak_name = update_package["equipment_name"]
+			self.cloak_type = update_package["equipment_type"]
+			self.cloak_speed = update_package["equipment_speed"]
+			self.cloak_brawn = update_package["equipment_brawn"]
+			self.cloak_magic = update_package["equipment_magic"]
+			self.cloak_armour = update_package["equipment_armour"]
+			self.cloak_health = update_package["equipment_health"]
 
+		elif id_cell == "backpack_cell_1":
+			self.backpack_cell_1_name = update_package["equipment_name"]
+			self.backpack_cell_1_type = update_package["equipment_type"]
+			self.backpack_cell_1_speed = update_package["equipment_speed"]
+			self.backpack_cell_1_brawn = update_package["equipment_brawn"]
+			self.backpack_cell_1_magic = update_package["equipment_magic"]
+			self.backpack_cell_1_armour = update_package["equipment_armour"]
+			self.backpack_cell_1_health = update_package["equipment_health"]
+		elif id_cell == "backpack_cell_2":
+			self.backpack_cell_2_name = update_package["equipment_name"]
+			self.backpack_cell_2_type = update_package["equipment_type"]
+			self.backpack_cell_2_speed = update_package["equipment_speed"]
+			self.backpack_cell_2_brawn = update_package["equipment_brawn"]
+			self.backpack_cell_2_magic = update_package["equipment_magic"]
+			self.backpack_cell_2_armour = update_package["equipment_armour"]
+			self.backpack_cell_2_health = update_package["equipment_health"]
+		elif id_cell == "backpack_cell_3":
+			self.backpack_cell_3_name = update_package["equipment_name"]
+			self.backpack_cell_3_type = update_package["equipment_type"]
+			self.backpack_cell_3_speed = update_package["equipment_speed"]
+			self.backpack_cell_3_brawn = update_package["equipment_brawn"]
+			self.backpack_cell_3_magic = update_package["equipment_magic"]
+			self.backpack_cell_3_armour = update_package["equipment_armour"]
+			self.backpack_cell_3_health = update_package["equipment_health"]
+		elif id_cell == "backpack_cell_4":
+			self.backpack_cell_4_name = update_package["equipment_name"]
+			self.backpack_cell_4_type = update_package["equipment_type"]
+			self.backpack_cell_4_speed = update_package["equipment_speed"]
+			self.backpack_cell_4_brawn = update_package["equipment_brawn"]
+			self.backpack_cell_4_magic = update_package["equipment_magic"]
+			self.backpack_cell_4_armour = update_package["equipment_armour"]
+			self.backpack_cell_4_health = update_package["equipment_health"]
+		elif id_cell == "backpack_cell_5":
+			self.backpack_cell_5_name = update_package["equipment_name"]
+			self.backpack_cell_5_type = update_package["equipment_type"]
+			self.backpack_cell_5_speed = update_package["equipment_speed"]
+			self.backpack_cell_5_brawn = update_package["equipment_brawn"]
+			self.backpack_cell_5_magic = update_package["equipment_magic"]
+			self.backpack_cell_5_armour = update_package["equipment_armour"]
+			self.backpack_cell_5_health = update_package["equipment_health"]
+		else:
+			raise(f'Unknown type of equipment {update_package["equipment_type"]}')
 
 	def player_2_json(self):
 		""" Для сериализации объекта Player в json при сохранении файла героя """

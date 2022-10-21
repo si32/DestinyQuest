@@ -490,6 +490,7 @@ class DestinyQuest:
             self._equipment_closed = False
         else:
             self.equipment_field.grid_forget()
+            print("Forget!")
             self.equipment_btn["text"] = f"{ICON_PLUS}{ICON_BACKPACK}Equipment"
             self._equipment_closed = True
 
@@ -647,60 +648,65 @@ class DestinyQuest:
     opened_window = {}
     def open_equipment_window(self, equipment_cell_name):
         """ Открыть одно новое окно для любой ячейки в обмундировании и рюкзаке """
-        equip = self.define_equipment(equipment_cell_name)
+        # Make ID_cell from cell label name
+        self.id_cell = equipment_cell_name[:-1].lower().replace(" ", "_")
+        self.equip = self.define_equipment(self.id_cell)
         global opened_window
-        if equipment_cell_name not in opened_window.keys():
-            opened_window[equipment_cell_name] = 1
+        if self.id_cell not in opened_window.keys():
+            opened_window[self.id_cell] = 1
             # Если у героя нет еще оборудования, то на редактирование, а так только на посмотреть
-            if equip["equipment_name"] == "":
-                self.equipment_window = EquipmentWindow(self.player, equipment_cell_name, equip, "active")
+            if self.equip["equipment_name"] == "":
+                self.equipment_window = EquipmentWindow(self.player, self.id_cell, self.equip, "active")
             else:
-                self.equipment_window = EquipmentWindow(self.player, equipment_cell_name, equip, "disabled")
+                self.equipment_window = EquipmentWindow(self.player, self.id_cell, self.equip, "disabled")
 
             # Запретить пользователю взаимодействовать с основным окном
             self.equipment_window.grab_set()
             # При закрытие окна, чисть глобальную переменную
-            self.equipment_window.protocol("WM_DELETE_WINDOW", lambda: self.close_equipment_window(equipment_cell_name))
+            self.equipment_window.protocol("WM_DELETE_WINDOW", lambda: self.close_equipment_window(self.id_cell))
             # Реагировать только на событие дестроя всего окна, а не каждого его виджета
-            self.equipment_window.bind("<Destroy>", lambda e:self.close_equipment_window(equipment_cell_name) if e.widget == self.equipment_window else None)
+            self.equipment_window.bind("<Destroy>", lambda e:self.close_equipment_window(self.id_cell) if e.widget == self.equipment_window else None)
 
-    def close_equipment_window(self, equipment_cell_name):
-        """ При закрытие окна почистить гловабльную переменную, чтоб иметь возможность открывать окно снова """
+    def close_equipment_window(self, id_cell):
+        """ При закрытии окна почистить глобальную переменную, чтобы иметь возможность открывать окно снова """
+        self.id_cell = id_cell
         global opened_window
-        if equipment_cell_name in opened_window:
-            opened_window.pop(equipment_cell_name)
+        if self.id_cell in opened_window:
+            opened_window.pop(self.id_cell)
         self.equipment_window.destroy()
-        # Update windows fields
+        # Update windows fields (but firstly must forget the previuos ones)
+        self.stats_hero_field.grid_forget()
+        self.equipment_field.grid_forget()
         self.create_stats_hero_field()
         self.create_equipment_field()
 
-    def define_equipment(self, equipment_cell_name):
+    def define_equipment(self, id_cell):
         """ Define all attributes of specific equipment """
-        # Из леЙбла ячеки сделать ключ для словаря
-        equipment_cell_id = equipment_cell_name[:-1].lower().replace(" ", "_")
         #  Объект player сириализуем в строку, потом эту строку в словарь питона
-        equip_dict = json.loads(json.dumps(self.player, default=Player.player_2_json,  ensure_ascii=False, indent=4))
+        self.equip_dict = json.loads(json.dumps(self.player, default=Player.player_2_json,  ensure_ascii=False, indent=4))
         try:
-            equip = {}
-            equip = equip_dict["equipment"][equipment_cell_id]
+            self.equip = {}
+            self.equip = self.equip_dict["equipment"][id_cell]
         except Error:
             pass
-        return equip
+        return self.equip
 
 
 class EquipmentWindow(tk.Toplevel):
     """ Class for creating a new window for any equipment cell """
-    def __init__(self, player, equipment_cell_name, equip: dict, state="active"):
+    def __init__(self, player, id_cell, equip: dict, state="active"):
         super().__init__()
         self.player = player
-        self.equipment_cell_name = equipment_cell_name
+        self.id_cell = id_cell
+        self.equipment_cell_name = self.id_cell.title().replace("_", " ")
         self.equip = equip
         self.state = state
-        self.title(f"Сharacteristics {equipment_cell_name}")
+        self.title(f"Сharacteristics {self.equipment_cell_name}")
         self.resizable(False,False)
         self.init_gui()
 
     def activate_state(self, state):
+        """ Make equipment window active or not depends on emptyness of the equipment cell """
         self.state = state
         if self.state == "disabled":
             for child in self.equipment_stats_field.winfo_children():
@@ -709,7 +715,19 @@ class EquipmentWindow(tk.Toplevel):
             for child in self.equipment_stats_field.winfo_children():
                 child.configure(state="normal")
 
-    def delete_equipment(self):
+    def check_equipment_name(self):
+        """ Check if name is not empty """
+        name = self.equipment_name_ent.get()
+        # Must have at least one visiable character
+        if name:
+            for c in name:
+                if c.isalnum():
+                    return True
+            return False
+        else:
+            return False
+
+    def clear_equipment_window_forms(self):
         """ Delete information about equipment in equipment window """
         self.equipment_name_ent.delete(0, tk.END)
         self.equipment_type_lst.set(self.equip["equipment_type"])
@@ -720,7 +738,7 @@ class EquipmentWindow(tk.Toplevel):
         self.equipment_health_ent.delete(0, tk.END)
 
     def get_update_package(self):
-        # Collect data to update package
+        """ Collect data to update package """
         self.update_package = {}
         self.update_package["equipment_name"] = self.equipment_name_ent.get()
         self.update_package["equipment_type"] = self.equipment_type_lst.get()
@@ -729,6 +747,12 @@ class EquipmentWindow(tk.Toplevel):
         self.update_package["equipment_magic"] = self.equipment_magic_ent.get()
         self.update_package["equipment_armour"] = self.equipment_armour_ent.get()
         self.update_package["equipment_health"] = self.equipment_health_ent.get()
+        for key, value in self.update_package.items():
+            if key in ("equipment_speed", "equipment_brawn", "equipment_magic", "equipment_armour", "equipment_health"):
+                try:
+                    self.update_package[key] = int(value)
+                except ValueError:
+                    self.update_package[key] = 0
         return self.update_package
 
     def operate_puton_apply_btn(self):
@@ -755,10 +779,10 @@ class EquipmentWindow(tk.Toplevel):
             self.player.update_characteristics(self.update_package, direction="minus")
             self.player.throw_away_equipment(self.update_package["equipment_type"])
             self.activate_state("active")
-            self.delete_equipment()
+            self.clear_equipment_window_forms()
             print("throw away!")
 
-    def find_empty_cell(self):
+    def find_empty_backpack_cell(self):
         """ Find empty space in backpack to add new equipment """
         # Лист возможных значение для ячеек рюкзака
         self.backpack_cells = {
@@ -773,14 +797,21 @@ class EquipmentWindow(tk.Toplevel):
                 return k
         return False
 
+    def is_empty_equipment_cell(self, id_cell):
+        """ check if equipment cell is empty """
+        equipment_name = str(id_cell) + "_name"
+        if self.player.__dict__[equipment_name]:
+            return False
+        return True
+
+
     def operate_in_backpack_btn(self):
         # Если уже в рюкзаке, то просто закрыть (убрать обратно в рюкзак)
-        self.equipment_cell_id = self.equipment_cell_name[:-1].lower().replace(" ", "_")
-        if self.equipment_cell_id in ("backpack_cell_1", "backpack_cell_2", "backpack_cell_3", "backpack_cell_4", "backpack_cell_5"):
+        if self.id_cell in ("backpack_cell_1", "backpack_cell_2", "backpack_cell_3", "backpack_cell_4", "backpack_cell_5"):
             return self.destroy()
 
         # Ищем место в рюкзаке
-        empty_backpack_cell = self.find_empty_cell()
+        empty_backpack_cell = self.find_empty_backpack_cell()
         if not empty_backpack_cell:
             print("not empty!")
         else:
@@ -788,7 +819,7 @@ class EquipmentWindow(tk.Toplevel):
             self.player.update_player(self.update_package, package_type=empty_backpack_cell)
             self.player.throw_away_equipment(self.update_package["equipment_type"])
             self.activate_state("active")
-            self.delete_equipment()
+            self.clear_equipment_window_forms()
 
 
     def init_gui(self):
