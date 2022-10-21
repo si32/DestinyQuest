@@ -359,25 +359,19 @@ class Player:
 		self.backpack_cell_5_health = hero["equipment"]["backpack_cell_5"]["equipment_health"]
 		self.notes = hero["notes"]
 		# stats
+		self.update_stats()
+
+	def update_stats(self):
 		self.speed =  self.original_speed + self.cloak_speed + self.head_speed + self.gloves_speed + self.ring_1_speed + self.necklace_speed + self.ring_2_speed + self.right_hand_speed + self.chest_speed + self.left_hand_speed + self.talisman_speed + self.feet_speed
 		self.brawn =  self.original_brawn + self.cloak_brawn + self.head_brawn + self.gloves_brawn + self.ring_1_brawn + self.necklace_brawn + self.ring_2_brawn + self.right_hand_brawn + self.chest_brawn + self.left_hand_brawn + self.talisman_brawn + self.feet_brawn
 		self.magic =  self.original_magic + self.cloak_magic + self.head_magic + self.gloves_magic + self.ring_1_magic + self.necklace_magic + self.ring_2_magic + self.right_hand_magic + self.chest_magic + self.left_hand_magic + self.talisman_magic + self.feet_magic
 		self.armour = self.original_armour + self.cloak_armour + self.head_armour + self.gloves_armour + self.ring_1_armour + self.necklace_armour + self.ring_2_armour + self.right_hand_armour + self.chest_armour + self.left_hand_armour + self.talisman_armour + self.feet_armour
 		self.health = self.original_health + self.cloak_health + self.head_health + self.gloves_health + self.ring_1_health + self.necklace_health + self.ring_2_health + self.right_hand_health + self.chest_health + self.left_hand_health + self.talisman_health + self.feet_health
 
-	def throw_away_equipment(self, equipment_type):
-		if equipment_type == "cloak":
-			self.cloak_name = ""
-			self.cloak_type = "cloak"
-			self.cloak_speed = 0
-			self.cloak_brawn = 0
-			self.cloak_magic = 0
-			self.cloak_armour = 0
-			self.cloak_health = 0
-
 	def update_player(self, id_cell, update_package:dict):
 		""" Update player equipment """
-		if id_cell == "cloak":
+		self.id_cell = id_cell
+		if self.id_cell == "cloak":
 			self.cloak_name = update_package["equipment_name"]
 			self.cloak_type = update_package["equipment_type"]
 			self.cloak_speed = update_package["equipment_speed"]
@@ -385,8 +379,87 @@ class Player:
 			self.cloak_magic = update_package["equipment_magic"]
 			self.cloak_armour = update_package["equipment_armour"]
 			self.cloak_health = update_package["equipment_health"]
-
-		elif id_cell == "backpack_cell_1":
+		elif self.id_cell == "head":
+			self.head_name = update_package["equipment_name"]
+			self.head_type = update_package["equipment_type"]
+			self.head_speed = update_package["equipment_speed"]
+			self.head_brawn = update_package["equipment_brawn"]
+			self.head_magic = update_package["equipment_magic"]
+			self.head_armour = update_package["equipment_armour"]
+			self.head_health = update_package["equipment_health"]
+		elif self.id_cell == "gloves":
+			self.gloves_name = update_package["equipment_name"]
+			self.gloves_type = update_package["equipment_type"]
+			self.gloves_speed = update_package["equipment_speed"]
+			self.gloves_brawn = update_package["equipment_brawn"]
+			self.gloves_magic = update_package["equipment_magic"]
+			self.gloves_armour = update_package["equipment_armour"]
+			self.gloves_health = update_package["equipment_health"]
+		elif self.id_cell == "ring_1":
+			self.ring_1_name = update_package["equipment_name"]
+			self.ring_1_type = update_package["equipment_type"]
+			self.ring_1_speed = update_package["equipment_speed"]
+			self.ring_1_brawn = update_package["equipment_brawn"]
+			self.ring_1_magic = update_package["equipment_magic"]
+			self.ring_1_armour = update_package["equipment_armour"]
+			self.ring_1_health = update_package["equipment_health"]
+		elif self.id_cell == "necklace":
+			self.necklace_name = update_package["equipment_name"]
+			self.necklace_type = update_package["equipment_type"]
+			self.necklace_speed = update_package["equipment_speed"]
+			self.necklace_brawn = update_package["equipment_brawn"]
+			self.necklace_magic = update_package["equipment_magic"]
+			self.necklace_armour = update_package["equipment_armour"]
+			self.necklace_health = update_package["equipment_health"]
+		elif self.id_cell == "ring_2":
+			self.ring_2_name = update_package["equipment_name"]
+			self.ring_2_type = update_package["equipment_type"]
+			self.ring_2_speed = update_package["equipment_speed"]
+			self.ring_2_brawn = update_package["equipment_brawn"]
+			self.ring_2_magic = update_package["equipment_magic"]
+			self.ring_2_armour = update_package["equipment_armour"]
+			self.ring_2_health = update_package["equipment_health"]
+		elif self.id_cell == "right_hand":
+			self.right_hand_name = update_package["equipment_name"]
+			self.right_hand_type = update_package["equipment_type"]
+			self.right_hand_speed = update_package["equipment_speed"]
+			self.right_hand_brawn = update_package["equipment_brawn"]
+			self.right_hand_magic = update_package["equipment_magic"]
+			self.right_hand_armour = update_package["equipment_armour"]
+			self.right_hand_health = update_package["equipment_health"]
+		elif self.id_cell == "chest":
+			self.chest_name = update_package["equipment_name"]
+			self.chest_type = update_package["equipment_type"]
+			self.chest_speed = update_package["equipment_speed"]
+			self.chest_brawn = update_package["equipment_brawn"]
+			self.chest_magic = update_package["equipment_magic"]
+			self.chest_armour = update_package["equipment_armour"]
+			self.chest_health = update_package["equipment_health"]
+		elif self.id_cell == "left_hand":
+			self.left_hand_name = update_package["equipment_name"]
+			self.left_hand_type = update_package["equipment_type"]
+			self.left_hand_speed = update_package["equipment_speed"]
+			self.left_hand_brawn = update_package["equipment_brawn"]
+			self.left_hand_magic = update_package["equipment_magic"]
+			self.left_hand_armour = update_package["equipment_armour"]
+			self.left_hand_health = update_package["equipment_health"]
+		elif self.id_cell == "talisman":
+			self.talisman_name = update_package["equipment_name"]
+			self.talisman_type = update_package["equipment_type"]
+			self.talisman_speed = update_package["equipment_speed"]
+			self.talisman_brawn = update_package["equipment_brawn"]
+			self.talisman_magic = update_package["equipment_magic"]
+			self.talisman_armour = update_package["equipment_armour"]
+			self.talisman_health = update_package["equipment_health"]
+		elif self.id_cell == "feet":
+			self.feet_name = update_package["equipment_name"]
+			self.feet_type = update_package["equipment_type"]
+			self.feet_speed = update_package["equipment_speed"]
+			self.feet_brawn = update_package["equipment_brawn"]
+			self.feet_magic = update_package["equipment_magic"]
+			self.feet_armour = update_package["equipment_armour"]
+			self.feet_health = update_package["equipment_health"]
+		elif self.id_cell == "backpack_cell_1":
 			self.backpack_cell_1_name = update_package["equipment_name"]
 			self.backpack_cell_1_type = update_package["equipment_type"]
 			self.backpack_cell_1_speed = update_package["equipment_speed"]
@@ -394,7 +467,7 @@ class Player:
 			self.backpack_cell_1_magic = update_package["equipment_magic"]
 			self.backpack_cell_1_armour = update_package["equipment_armour"]
 			self.backpack_cell_1_health = update_package["equipment_health"]
-		elif id_cell == "backpack_cell_2":
+		elif self.id_cell == "backpack_cell_2":
 			self.backpack_cell_2_name = update_package["equipment_name"]
 			self.backpack_cell_2_type = update_package["equipment_type"]
 			self.backpack_cell_2_speed = update_package["equipment_speed"]
@@ -402,7 +475,7 @@ class Player:
 			self.backpack_cell_2_magic = update_package["equipment_magic"]
 			self.backpack_cell_2_armour = update_package["equipment_armour"]
 			self.backpack_cell_2_health = update_package["equipment_health"]
-		elif id_cell == "backpack_cell_3":
+		elif self.id_cell == "backpack_cell_3":
 			self.backpack_cell_3_name = update_package["equipment_name"]
 			self.backpack_cell_3_type = update_package["equipment_type"]
 			self.backpack_cell_3_speed = update_package["equipment_speed"]
@@ -410,7 +483,7 @@ class Player:
 			self.backpack_cell_3_magic = update_package["equipment_magic"]
 			self.backpack_cell_3_armour = update_package["equipment_armour"]
 			self.backpack_cell_3_health = update_package["equipment_health"]
-		elif id_cell == "backpack_cell_4":
+		elif self.id_cell == "backpack_cell_4":
 			self.backpack_cell_4_name = update_package["equipment_name"]
 			self.backpack_cell_4_type = update_package["equipment_type"]
 			self.backpack_cell_4_speed = update_package["equipment_speed"]
@@ -418,7 +491,7 @@ class Player:
 			self.backpack_cell_4_magic = update_package["equipment_magic"]
 			self.backpack_cell_4_armour = update_package["equipment_armour"]
 			self.backpack_cell_4_health = update_package["equipment_health"]
-		elif id_cell == "backpack_cell_5":
+		elif self.id_cell == "backpack_cell_5":
 			self.backpack_cell_5_name = update_package["equipment_name"]
 			self.backpack_cell_5_type = update_package["equipment_type"]
 			self.backpack_cell_5_speed = update_package["equipment_speed"]
@@ -428,6 +501,7 @@ class Player:
 			self.backpack_cell_5_health = update_package["equipment_health"]
 		else:
 			raise(f'Unknown type of equipment {update_package["equipment_type"]}')
+		self.update_stats()
 
 	def player_2_json(self):
 		""" Для сериализации объекта Player в json при сохранении файла героя """

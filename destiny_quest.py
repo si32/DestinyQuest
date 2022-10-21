@@ -490,7 +490,6 @@ class DestinyQuest:
             self._equipment_closed = False
         else:
             self.equipment_field.grid_forget()
-            print("Forget!")
             self.equipment_btn["text"] = f"{ICON_PLUS}{ICON_BACKPACK}Equipment"
             self._equipment_closed = True
 
@@ -523,52 +522,52 @@ class DestinyQuest:
 
         # Head
         self.head_lbl = tk.Label(master=self.outfit_field, text="Head:", font=FONT_EQUIPMENT_LBL, bg=COLOR_EQUIPMENT, anchor="n")
-        self.head_value_lbl = tk.Label(master=self.outfit_field, wraplength=WRAP_EQUIPMENT_VALUE_LBL, text="Корона", font=FONT_EQUIPMENT_VALUE_LBL, bg=COLOR_EQUIPMENT, height=2, anchor="n")
+        self.head_value_lbl = tk.Label(master=self.outfit_field, wraplength=WRAP_EQUIPMENT_VALUE_LBL, text=self.player.head_name, font=FONT_EQUIPMENT_VALUE_LBL, bg=COLOR_EQUIPMENT, height=2, anchor="n")
         self.head_lbl.grid(row=0, column=1, sticky="nsew", pady=(2,0))
         self.head_value_lbl.grid(row=1, column=1, sticky="nsew")
         # Gloves
         self.gloves_lbl = tk.Label(master=self.outfit_field, text="Gloves:", font=FONT_EQUIPMENT_LBL, bg=COLOR_EQUIPMENT, anchor="n")
-        self.gloves_value_lbl = tk.Label(master=self.outfit_field, wraplength=WRAP_EQUIPMENT_VALUE_LBL, text="ПДракона", font=FONT_EQUIPMENT_VALUE_LBL, bg=COLOR_EQUIPMENT, height=2, anchor="n")
+        self.gloves_value_lbl = tk.Label(master=self.outfit_field, wraplength=WRAP_EQUIPMENT_VALUE_LBL, text=self.player.gloves_name, font=FONT_EQUIPMENT_VALUE_LBL, bg=COLOR_EQUIPMENT, height=2, anchor="n")
         self.gloves_lbl.grid(row=0, column=2, sticky="nsew", pady=(2,0), padx=2)
         self.gloves_value_lbl.grid(row=1, column=2, sticky="nsew", padx=2)
         # Ring 1
         self.ring1_lbl = tk.Label(master=self.outfit_field, text="Ring 1:", font=FONT_EQUIPMENT_LBL, bg=COLOR_EQUIPMENT, anchor="n")
-        self.ring1_value_lbl = tk.Label(master=self.outfit_field, wraplength=WRAP_EQUIPMENT_VALUE_LBL, text="Кольцо власти:", font=FONT_EQUIPMENT_VALUE_LBL, bg=COLOR_EQUIPMENT, height=2, anchor="n")
+        self.ring1_value_lbl = tk.Label(master=self.outfit_field, wraplength=WRAP_EQUIPMENT_VALUE_LBL, text=self.player.ring_1_name, font=FONT_EQUIPMENT_VALUE_LBL, bg=COLOR_EQUIPMENT, height=2, anchor="n")
         self.ring1_lbl.grid(row=2, column=0, sticky="nsew", pady=(2,0), padx=2)
         self.ring1_value_lbl.grid(row=3, column=0, sticky="nsew", padx=2)
         # Necklace
         self.necklace_lbl = tk.Label(master=self.outfit_field, text="Necklace:", font=FONT_EQUIPMENT_LBL, bg=COLOR_EQUIPMENT, anchor="n")
-        self.necklace_value_lbl = tk.Label(master=self.outfit_field,wraplength=WRAP_EQUIPMENT_VALUE_LBL,  text="", font=FONT_EQUIPMENT_VALUE_LBL, bg=COLOR_EQUIPMENT, height=2, anchor="n")
+        self.necklace_value_lbl = tk.Label(master=self.outfit_field,wraplength=WRAP_EQUIPMENT_VALUE_LBL,  text=self.player.necklace_name, font=FONT_EQUIPMENT_VALUE_LBL, bg=COLOR_EQUIPMENT, height=2, anchor="n")
         self.necklace_lbl.grid(row=2, column=1, sticky="nsew", pady=(2,0))
         self.necklace_value_lbl.grid(row=3, column=1, sticky="nsew")
         # Ring 2
         self.ring2_lbl = tk.Label(master=self.outfit_field, text="Ring 2:", font=FONT_EQUIPMENT_LBL, bg=COLOR_EQUIPMENT, anchor="n")
-        self.ring2_value_lbl = tk.Label(master=self.outfit_field, wraplength=WRAP_EQUIPMENT_VALUE_LBL, text="", font=FONT_EQUIPMENT_VALUE_LBL, bg=COLOR_EQUIPMENT, height=2, anchor="n")
+        self.ring2_value_lbl = tk.Label(master=self.outfit_field, wraplength=WRAP_EQUIPMENT_VALUE_LBL, text=self.player.ring_2_name, font=FONT_EQUIPMENT_VALUE_LBL, bg=COLOR_EQUIPMENT, height=2, anchor="n")
         self.ring2_lbl.grid(row=2, column=2, sticky="nsew", pady=(2,0), padx=2)
         self.ring2_value_lbl.grid(row=3, column=2, sticky="nsew", padx=2)
         # # Right hand
         self.right_hand_lbl = tk.Label(master=self.outfit_field, text="Right hand:", font=FONT_EQUIPMENT_LBL, bg=COLOR_EQUIPMENT, anchor="n")
-        self.right_hand_value_lbl = tk.Label(master=self.outfit_field, wraplength=WRAP_EQUIPMENT_VALUE_LBL, text="", font=FONT_EQUIPMENT_VALUE_LBL, bg=COLOR_EQUIPMENT, height=2, anchor="n")
+        self.right_hand_value_lbl = tk.Label(master=self.outfit_field, wraplength=WRAP_EQUIPMENT_VALUE_LBL, text=self.player.right_hand_name, font=FONT_EQUIPMENT_VALUE_LBL, bg=COLOR_EQUIPMENT, height=2, anchor="n")
         self.right_hand_lbl.grid(row=4, column=0, sticky="nsew", pady=(2,0), padx=2)
         self.right_hand_value_lbl.grid(row=5, column=0, sticky="nsew", padx=2)
         # Chest
         self.chest_lbl = tk.Label(master=self.outfit_field, text="Chest:", font=FONT_EQUIPMENT_LBL, bg=COLOR_EQUIPMENT, anchor="n")
-        self.chest_value_lbl = tk.Label(master=self.outfit_field, wraplength=WRAP_EQUIPMENT_VALUE_LBL, text="", font=FONT_EQUIPMENT_VALUE_LBL, bg=COLOR_EQUIPMENT, height=2, anchor="n")
+        self.chest_value_lbl = tk.Label(master=self.outfit_field, wraplength=WRAP_EQUIPMENT_VALUE_LBL, text=self.player.chest_name, font=FONT_EQUIPMENT_VALUE_LBL, bg=COLOR_EQUIPMENT, height=2, anchor="n")
         self.chest_lbl.grid(row=4, column=1, sticky="nsew", pady=(2,0))
         self.chest_value_lbl.grid(row=5, column=1, sticky="nsew")
         # Left hand
         self.left_hand_lbl = tk.Label(master=self.outfit_field, text="Left hand:", font=FONT_EQUIPMENT_LBL, bg=COLOR_EQUIPMENT, anchor="n")
-        self.left_hand_value_lbl = tk.Label(master=self.outfit_field, wraplength=WRAP_EQUIPMENT_VALUE_LBL, text="", font=FONT_EQUIPMENT_VALUE_LBL, bg=COLOR_EQUIPMENT, height=2, anchor="n")
+        self.left_hand_value_lbl = tk.Label(master=self.outfit_field, wraplength=WRAP_EQUIPMENT_VALUE_LBL, text=self.player.left_hand_name, font=FONT_EQUIPMENT_VALUE_LBL, bg=COLOR_EQUIPMENT, height=2, anchor="n")
         self.left_hand_lbl.grid(row=4, column=2, sticky="nsew", pady=(2,0), padx=2)
         self.left_hand_value_lbl.grid(row=5, column=2, sticky="nsew", padx=2)
         # Talisman
         self.talisman_lbl = tk.Label(master=self.outfit_field, text="Talisman:", font=FONT_EQUIPMENT_LBL, bg=COLOR_EQUIPMENT, anchor="n")
-        self.talisman_value_lbl = tk.Label(master=self.outfit_field, wraplength=WRAP_EQUIPMENT_VALUE_LBL, text="", font=FONT_EQUIPMENT_VALUE_LBL, bg=COLOR_EQUIPMENT, height=2, anchor="n")
+        self.talisman_value_lbl = tk.Label(master=self.outfit_field, wraplength=WRAP_EQUIPMENT_VALUE_LBL, text=self.player.talisman_name, font=FONT_EQUIPMENT_VALUE_LBL, bg=COLOR_EQUIPMENT, height=2, anchor="n")
         self.talisman_lbl.grid(row=6, column=0, sticky="nsew", pady=(2,0), padx=2)
         self.talisman_value_lbl.grid(row=7, column=0, sticky="nsew", padx=2)
         # Feet
         self.feet_lbl = tk.Label(master=self.outfit_field, text="Feet:", font=FONT_EQUIPMENT_LBL, bg=COLOR_EQUIPMENT, anchor="n")
-        self.feet_value_lbl = tk.Label(master=self.outfit_field, wraplength=WRAP_EQUIPMENT_VALUE_LBL, text="", font=FONT_EQUIPMENT_VALUE_LBL, bg=COLOR_EQUIPMENT, height=2, anchor="n")
+        self.feet_value_lbl = tk.Label(master=self.outfit_field, wraplength=WRAP_EQUIPMENT_VALUE_LBL, text=self.player.feet_name, font=FONT_EQUIPMENT_VALUE_LBL, bg=COLOR_EQUIPMENT, height=2, anchor="n")
         self.feet_lbl.grid(row=6, column=1, sticky="nsew", pady=(2,0))
         self.feet_value_lbl.grid(row=7, column=1, sticky="nsew")
         # Money pouch
@@ -715,12 +714,13 @@ class EquipmentWindow(tk.Toplevel):
             for child in self.equipment_stats_field.winfo_children():
                 child.configure(state="normal")
 
-    def check_equipment_name(self):
+    def is_equipment_name(self):
         """ Check if name is not empty """
-        name = self.equipment_name_ent.get()
+        # self.activate_state("active")
+        self.name = self.equipment_name_ent.get()
         # Must have at least one visiable character
-        if name:
-            for c in name:
+        if self.name:
+            for c in self.name:
                 if c.isalnum():
                     return True
             return False
@@ -729,6 +729,7 @@ class EquipmentWindow(tk.Toplevel):
 
     def clear_equipment_window_forms(self):
         """ Delete information about equipment in equipment window """
+        self.activate_state("active")
         self.equipment_name_ent.delete(0, tk.END)
         self.equipment_type_lst.set(self.equip["equipment_type"])
         self.equipment_speed_ent.delete(0, tk.END)
@@ -756,31 +757,43 @@ class EquipmentWindow(tk.Toplevel):
         return self.update_package
 
     def operate_puton_apply_btn(self):
-            """ Обработка нажатия кнопки "Put on\Apply" """
-            if self.state == "active":
-                self.update_package = self.get_update_package()
-                puton_values = ["cloak", "head", "gloves", "ring", "necklace", "right_hand", "chest", "left_hand", "talisman", "feet"]
-                if self.update_package["equipment_type"] in puton_values:
-                    self.player.update_characteristics(self.update_package, direction="plus")
-                    self.player.update_player(self.update_package, package_type="equipment")
-                    self.destroy()
-                else:
-                    # Если это зелье, то используем, зелье удаляем
-                    self.player.update_characteristics(self.update_package, direction="plus")
-                    self.player.throw_away_equipment(self.update_package["equipment_type"])
-                    self.activate
-                    self.destroy()
-            else:
+        """ Обработка нажатия кнопки "Put on\Apply" """
+        puton_values = ["cloak", "head", "gloves", "ring", "necklace", "right_hand", "chest", "left_hand", "talisman", "feet"]
+        if self.state == "disabled" and self.id_cell in puton_values:
+            self.destroy()
+            return
+        if not self.is_equipment_name():
+            self.equipment_name_ent.config(bg="red")
+            return
+        self.update_package = self.get_update_package()
+        if self.update_package["equipment_type"] == self.id_cell:
+            self.player.update_player(self.id_cell, self.update_package)
+            self.destroy()
+        if self.update_package["equipment_type"] in puton_values:
+            if self.is_empty_equipment_cell(self.update_package["equipment_type"]):
+                self.player.update_player(self.update_package["equipment_type"], self.update_package)
+                # Очистить ячейку рюкзака
+                self.clear_cell()
                 self.destroy()
+            else:
+                info_msg = tk.messagebox.showinfo(title="Info", message=f'You have already put on {self.update_package["equipment_type"]} equipment. Put it in your backpack first or throw it away')
+        # Значит зелье. Необходимо применить один раз
+        else:
+            # self.activate_state("active")
+            pass
+
+    def clear_cell(self):
+        """ Clear equipment cell """
+        self.clear_equipment_window_forms()
+        self.update_package  = self.get_update_package()
+        self.player.update_player(self.id_cell, self.update_package)
 
     def operate_throw_away_btn(self):
-            """ Обработка нажатия кнопки "Throw away" """
-            self.update_package  = self.get_update_package()
-            self.player.update_characteristics(self.update_package, direction="minus")
-            self.player.throw_away_equipment(self.update_package["equipment_type"])
-            self.activate_state("active")
-            self.clear_equipment_window_forms()
-            print("throw away!")
+        """ Обработка нажатия кнопки "Throw away" """
+        if self.state == "disabled":
+            self.clear_cell()
+        self.destroy()
+        print("throw away!")
 
     def find_empty_backpack_cell(self):
         """ Find empty space in backpack to add new equipment """
@@ -804,23 +817,38 @@ class EquipmentWindow(tk.Toplevel):
             return False
         return True
 
-
     def operate_in_backpack_btn(self):
         # Если уже в рюкзаке, то просто закрыть (убрать обратно в рюкзак)
         if self.id_cell in ("backpack_cell_1", "backpack_cell_2", "backpack_cell_3", "backpack_cell_4", "backpack_cell_5"):
-            return self.destroy()
-
-        # Ищем место в рюкзаке
-        empty_backpack_cell = self.find_empty_backpack_cell()
-        if not empty_backpack_cell:
-            print("not empty!")
-        else:
+            if self.state == "disabled":
+                return self.destroy()
+            elif self.state == "active":
+                if not self.is_equipment_name():
+                    self.equipment_name_ent.config(bg="red")
+                    return
             self.update_package = self.get_update_package()
-            self.player.update_player(self.update_package, package_type=empty_backpack_cell)
-            self.player.throw_away_equipment(self.update_package["equipment_type"])
-            self.activate_state("active")
-            self.clear_equipment_window_forms()
-
+            self.player.update_player(self.id_cell, self.update_package)
+            self.destroy()
+        # Если открыта ячейка оборудования и мы хотим убрать его в рюкзак
+        else:
+            # Ищем место в рюкзаке
+            self.empty_backpack_cell = self.find_empty_backpack_cell()
+            if not self.empty_backpack_cell:
+                info_msg = tk.messagebox.showinfo(title="Info", message="You don't have empty space in your backpack")
+            else:
+                if self.state == "active":
+                    if not self.is_equipment_name():
+                        self.equipment_name_ent.config(bg="red")
+                        return
+                    self.update_package = self.get_update_package()
+                    self.player.update_player(self.empty_backpack_cell, self.update_package)
+                    self.destroy()
+                elif self.state == "disabled":
+                    self.update_package = self.get_update_package()
+                    self.player.update_player(self.empty_backpack_cell, self.update_package)
+                    # Снять с себя одетую вещь
+                    self.clear_cell()
+                    self.destroy()
 
     def init_gui(self):
         """ Create window GUI """
