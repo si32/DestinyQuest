@@ -580,19 +580,29 @@ class DestinyQuest:
         self.backpack_lbl = tk.Label(master=self.backpack_field, text="Backpack:", font=FONT_EQUIPMENT_LBL, anchor="nw")
         self.backpack_lbl.grid(row=0, column=0, columnspan=5, sticky="nsew", padx=2)
         # Cell 1
-        self.cell1_lbl = tk.Label(master=self.backpack_field, wraplength=WRAP_EQUIPMENT_VALUE_LBL, text="Копье", font=FONT_EQUIPMENT_VALUE_LBL, bg=COLOR_EQUIPMENT, height=2, anchor="n")
+        self.cell1_lbl = tk.Label(
+            master=self.backpack_field, wraplength=WRAP_EQUIPMENT_VALUE_LBL, text=self.player.backpack_cell_1_name,
+            font=FONT_EQUIPMENT_VALUE_LBL, bg=COLOR_EQUIPMENT, height=2, anchor="n")
         self.cell1_lbl.grid(row=1, column=0, sticky="nsew", padx=1)
         # Cell 2
-        self.cell2_lbl = tk.Label(master=self.backpack_field, wraplength=WRAP_EQUIPMENT_VALUE_LBL, text="Копье", font=FONT_EQUIPMENT_VALUE_LBL, bg=COLOR_EQUIPMENT, height=2, anchor="n")
+        self.cell2_lbl = tk.Label(
+            master=self.backpack_field, wraplength=WRAP_EQUIPMENT_VALUE_LBL, text=self.player.backpack_cell_2_name,
+            font=FONT_EQUIPMENT_VALUE_LBL, bg=COLOR_EQUIPMENT, height=2, anchor="n")
         self.cell2_lbl.grid(row=1, column=1, sticky="nsew", padx=1)
         # Cell 3
-        self.cell3_lbl = tk.Label(master=self.backpack_field, wraplength=WRAP_EQUIPMENT_VALUE_LBL, text="Копье", font=FONT_EQUIPMENT_VALUE_LBL, bg=COLOR_EQUIPMENT, height=2, anchor="n")
+        self.cell3_lbl = tk.Label(
+            master=self.backpack_field, wraplength=WRAP_EQUIPMENT_VALUE_LBL, text=self.player.backpack_cell_3_name,
+            font=FONT_EQUIPMENT_VALUE_LBL, bg=COLOR_EQUIPMENT, height=2, anchor="n")
         self.cell3_lbl.grid(row=1, column=2, sticky="nsew", padx=1)
         # Cell 4
-        self.cell4_lbl = tk.Label(master=self.backpack_field, wraplength=WRAP_EQUIPMENT_VALUE_LBL, text="Копье", font=FONT_EQUIPMENT_VALUE_LBL, bg=COLOR_EQUIPMENT, height=2, anchor="n")
+        self.cell4_lbl = tk.Label(
+            master=self.backpack_field, wraplength=WRAP_EQUIPMENT_VALUE_LBL, text=self.player.backpack_cell_4_name,
+            font=FONT_EQUIPMENT_VALUE_LBL, bg=COLOR_EQUIPMENT, height=2, anchor="n")
         self.cell4_lbl.grid(row=1, column=3, sticky="nsew", padx=1)
         # Cell 5
-        self.cell5_lbl = tk.Label(master=self.backpack_field, wraplength=WRAP_EQUIPMENT_VALUE_LBL, text="Копье", font=FONT_EQUIPMENT_VALUE_LBL, bg=COLOR_EQUIPMENT, height=2, anchor="n")
+        self.cell5_lbl = tk.Label(
+            master=self.backpack_field, wraplength=WRAP_EQUIPMENT_VALUE_LBL, text=self.player.backpack_cell_5_name,
+            font=FONT_EQUIPMENT_VALUE_LBL, bg=COLOR_EQUIPMENT, height=2, anchor="n")
         self.cell5_lbl.grid(row=1, column=4, sticky="nsew", padx=1)
         # Notes
         self.notes_lbl = tk.Label(master=self.backpack_field, text="Notes:", font=FONT_EQUIPMENT_LBL, anchor="nw")
@@ -643,9 +653,9 @@ class DestinyQuest:
             opened_window[equipment_cell_name] = 1
             # Если у героя нет еще оборудования, то на редактирование, а так только на посмотреть
             if equip["equipment_name"] == "":
-                self.equipment_window = EquipmentWindow(self.player, equip, "active")
+                self.equipment_window = EquipmentWindow(self.player, equipment_cell_name, equip, "active")
             else:
-                self.equipment_window = EquipmentWindow(self.player, equip, "disabled")
+                self.equipment_window = EquipmentWindow(self.player, equipment_cell_name, equip, "disabled")
 
             # Запретить пользователю взаимодействовать с основным окном
             self.equipment_window.grab_set()
@@ -667,12 +677,12 @@ class DestinyQuest:
     def define_equipment(self, equipment_cell_name):
         """ Define all attributes of specific equipment """
         # Из леЙбла ячеки сделать ключ для словаря
-        equipment_cell_name = equipment_cell_name[:-1].lower().replace(" ", "_")
+        equipment_cell_id = equipment_cell_name[:-1].lower().replace(" ", "_")
         #  Объект player сириализуем в строку, потом эту строку в словарь питона
         equip_dict = json.loads(json.dumps(self.player, default=Player.player_2_json,  ensure_ascii=False, indent=4))
         try:
             equip = {}
-            equip = equip_dict["equipment"][equipment_cell_name]
+            equip = equip_dict["equipment"][equipment_cell_id]
         except Error:
             pass
         return equip
@@ -680,12 +690,13 @@ class DestinyQuest:
 
 class EquipmentWindow(tk.Toplevel):
     """ Class for creating a new window for any equipment cell """
-    def __init__(self, player, equip: dict, state="active"):
+    def __init__(self, player, equipment_cell_name, equip: dict, state="active"):
         super().__init__()
         self.player = player
+        self.equipment_cell_name = equipment_cell_name
         self.equip = equip
         self.state = state
-        self.title(f"Сharacteristics {self.equip['equipment_type']}")
+        self.title(f"Сharacteristics {equipment_cell_name}")
         self.resizable(False,False)
         self.init_gui()
 
@@ -726,11 +737,15 @@ class EquipmentWindow(tk.Toplevel):
                 self.update_package = self.get_update_package()
                 puton_values = ["cloak", "head", "gloves", "ring", "necklace", "right_hand", "chest", "left_hand", "talisman", "feet"]
                 if self.update_package["equipment_type"] in puton_values:
-                    if self.player.update_player(self.update_package, permanently=True, direction="plus"):
-                        self.destroy()
+                    self.player.update_characteristics(self.update_package, direction="plus")
+                    self.player.update_player(self.update_package, package_type="equipment")
+                    self.destroy()
                 else:
-                    if self.player.update_player(self.update_package, permanently=False, direction="plus"):
-                        self.destroy()
+                    # Если это зелье, то используем, зелье удаляем
+                    self.player.update_characteristics(self.update_package, direction="plus")
+                    self.player.throw_away_equipment(self.update_package["equipment_type"])
+                    self.activate
+                    self.destroy()
             else:
                 self.destroy()
 
@@ -741,7 +756,39 @@ class EquipmentWindow(tk.Toplevel):
             self.player.throw_away_equipment(self.update_package["equipment_type"])
             self.activate_state("active")
             self.delete_equipment()
-            print("delete done!")
+            print("throw away!")
+
+    def find_empty_cell(self):
+        """ Find empty space in backpack to add new equipment """
+        # Лист возможных значение для ячеек рюкзака
+        self.backpack_cells = {
+            "backpack_cell_1": self.player.backpack_cell_1_name,
+            "backpack_cell_2": self.player.backpack_cell_2_name,
+            "backpack_cell_3": self.player.backpack_cell_3_name,
+            "backpack_cell_4": self.player.backpack_cell_4_name,
+            "backpack_cell_5": self.player.backpack_cell_5_name
+        }
+        for k, v in self.backpack_cells.items():
+            if v == "":
+                return k
+        return False
+
+    def operate_in_backpack_btn(self):
+        # Если уже в рюкзаке, то просто закрыть (убрать обратно в рюкзак)
+        self.equipment_cell_id = self.equipment_cell_name[:-1].lower().replace(" ", "_")
+        if self.equipment_cell_id in ("backpack_cell_1", "backpack_cell_2", "backpack_cell_3", "backpack_cell_4", "backpack_cell_5"):
+            return self.destroy()
+
+        # Ищем место в рюкзаке
+        empty_backpack_cell = self.find_empty_cell()
+        if not empty_backpack_cell:
+            print("not empty!")
+        else:
+            self.update_package = self.get_update_package()
+            self.player.update_player(self.update_package, package_type=empty_backpack_cell)
+            self.player.throw_away_equipment(self.update_package["equipment_type"])
+            self.activate_state("active")
+            self.delete_equipment()
 
 
     def init_gui(self):
@@ -768,7 +815,7 @@ class EquipmentWindow(tk.Toplevel):
         self.equipment_stats_field.grid(row=1, sticky="nsew", padx=5, pady=5)
         self.buttons_field.grid(row=2, sticky="nsew", padx=5, pady=(10,5))
         # Equipment cell name label
-        self.equipment_cell_name_lbl = tk.Label(master=self.equipment_cell_name_field, text=f"{self.equip['equipment_type'].title()}:", font=FONT_STATS)
+        self.equipment_cell_name_lbl = tk.Label(master=self.equipment_cell_name_field, text=f"{self.equipment_cell_name}:", font=FONT_STATS)
         self.equipment_cell_name_lbl.grid(row=0, sticky="w")
         # Equipment stats
         self.equipment_name_lbl = tk.Label(self.equipment_stats_field, text="Name:", font=FONT_STATS)
@@ -818,16 +865,12 @@ class EquipmentWindow(tk.Toplevel):
         # Buttons
         self.put_on_btn = tk.Button(master=self.buttons_field, text="Put on/Apply", command=self.operate_puton_apply_btn)
         self.throw_away_btn = tk.Button(master=self.buttons_field, text="Throw away", command=self.operate_throw_away_btn)
-        self.in_backpack_btn = tk.Button(master=self.buttons_field, text="In backpack")
+        self.in_backpack_btn = tk.Button(master=self.buttons_field, text="In backpack", command=self.operate_in_backpack_btn)
         self.put_on_btn.grid(row=0, column=0, sticky="nsew", padx=5)
         self.throw_away_btn.grid(row=0, column=1, sticky="nsew", padx=5)
         self.in_backpack_btn.grid(row=0, column=2, sticky="nsew", padx=5)
         # Activate state of window
         self.activate_state(self.state)
-
-
-
-
 
 # =============================================================================================================================
 def main():

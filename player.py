@@ -3,13 +3,11 @@ empty_hero = {
 	"name": "Новый герой",
 	"path": "Mage",
 	"career": "",
-	"characteristics": {
-		"speed": 0,
-		"brawn": 0,
-		"magic": 0,
-		"armour": 0,
-		"health": 30
-	},
+	"original_speed": 0,
+	"original_brawn": 0,
+	"original_magic": 0,
+	"original_armour": 0,
+	"original_health": 30,
 	"money_pouch": 10,
 	"equipment": {
 		"cloak": {
@@ -240,12 +238,12 @@ class Player:
 		self.name = hero["name"]
 		self.path = hero["path"]
 		self.career = hero["career"]
-		self.speed = hero["characteristics"]["speed"]
-		self.brawn = hero["characteristics"]["brawn"]
-		self.magic = hero["characteristics"]["magic"]
-		self.armour = hero["characteristics"]["armour"]
-		self.health = hero["characteristics"]["health"]
-
+		self.original_speed = hero["original_speed"]
+		self.original_brawn = hero["original_brawn"]
+		self.original_magic = hero["original_magic"]
+		self.original_armour = hero["original_armour"]
+		self.original_health = hero["original_health"]
+		self.money_pouch = hero["money_pouch"]
 		self.cloak_name = hero["equipment"]["cloak"]["equipment_name"]
 		self.cloak_type = hero["equipment"]["cloak"]["equipment_type"]
 		self.cloak_speed = hero["equipment"]["cloak"]["equipment_speed"]
@@ -323,7 +321,6 @@ class Player:
 		self.feet_magic = hero["equipment"]["feet"]["equipment_magic"]
 		self.feet_armour = hero["equipment"]["feet"]["equipment_armour"]
 		self.feet_health = hero["equipment"]["feet"]["equipment_health"]
-		self.money_pouch = hero["money_pouch"]
 
 		self.backpack_cell_1_name = hero["equipment"]["backpack_cell_1"]["equipment_name"]
 		self.backpack_cell_1_type = hero["equipment"]["backpack_cell_1"]["equipment_type"]
@@ -361,9 +358,15 @@ class Player:
 		self.backpack_cell_5_armour = hero["equipment"]["backpack_cell_5"]["equipment_armour"]
 		self.backpack_cell_5_health = hero["equipment"]["backpack_cell_5"]["equipment_health"]
 		self.notes = hero["notes"]
+		# stats
+		self.speed =  self.original_speed + self.cloak_speed + self.head_speed + self.gloves_speed + self.ring_1_speed + self.necklace_speed + self.ring_2_speed + self.right_hand_speed + self.chest_speed + self.left_hand_speed + self.talisman_speed + self.feet_speed
+		self.brawn =  self.original_brawn + self.cloak_brawn + self.head_brawn + self.gloves_brawn + self.ring_1_brawn + self.necklace_brawn + self.ring_2_brawn + self.right_hand_brawn + self.chest_brawn + self.left_hand_brawn + self.talisman_brawn + self.feet_brawn
+		self.magic =  self.original_magic + self.cloak_magic + self.head_magic + self.gloves_magic + self.ring_1_magic + self.necklace_magic + self.ring_2_magic + self.right_hand_magic + self.chest_magic + self.left_hand_magic + self.talisman_magic + self.feet_magic
+		self.armour = self.original_armour + self.cloak_armour + self.head_armour + self.gloves_armour + self.ring_1_armour + self.necklace_armour + self.ring_2_armour + self.right_hand_armour + self.chest_armour + self.left_hand_armour + self.talisman_armour + self.feet_armour
+		self.health = self.original_health + self.cloak_health + self.head_health + self.gloves_health + self.ring_1_health + self.necklace_health + self.ring_2_health + self.right_hand_health + self.chest_health + self.left_hand_health + self.talisman_health + self.feet_health
 
-	# Можно написать еще функцию валидации пакета
 	def validate_update_package(self, update_package):
+		# Validation update_package
 		self.update_package = update_package
 		for key, value in self.update_package.items():
 			if key in ("equipment_speed", "equipment_brawn", "equipment_magic", "equipment_armour", "equipment_health"):
@@ -400,24 +403,65 @@ class Player:
 			self.cloak_armour = 0
 			self.cloak_health = 0
 
-	def update_player(self, update_package:dict, permanently: bool, direction: ["plus", "minus"]):
+	def update_player(self, update_package:dict, package_type):
 		""" Update player. Permanently(put on equipment) or not(drink potion) """
-		if permanently:
-			if update_package["equipment_type"] == "cloak":
-				self.update_characteristics(update_package, direction)
-				self.cloak_name = update_package["equipment_name"]
-				self.cloak_type = update_package["equipment_type"]
-				self.cloak_speed = update_package["equipment_speed"]
-				self.cloak_brawn = update_package["equipment_brawn"]
-				self.cloak_magic = update_package["equipment_magic"]
-				self.cloak_armour = update_package["equipment_armour"]
-				self.cloak_health = update_package["equipment_health"]
+		self.package_type = package_type
+		try:
+			if self.package_type == "equipment":
+				if update_package["equipment_type"] == "cloak":
+					self.cloak_name = update_package["equipment_name"]
+					self.cloak_type = update_package["equipment_type"]
+					self.cloak_speed = update_package["equipment_speed"]
+					self.cloak_brawn = update_package["equipment_brawn"]
+					self.cloak_magic = update_package["equipment_magic"]
+					self.cloak_armour = update_package["equipment_armour"]
+					self.cloak_health = update_package["equipment_health"]
+				else:
+					raise(f'Unknown type of equipment {update_package["equipment_type"]}')
+			# Если это не оборудование значит все остальное в рюкзак
+			elif self.package_type == "backpack_cell_1":
+				self.backpack_cell_1_name = update_package["equipment_name"]
+				self.backpack_cell_1_type = update_package["equipment_type"]
+				self.backpack_cell_1_speed = update_package["equipment_speed"]
+				self.backpack_cell_1_brawn = update_package["equipment_brawn"]
+				self.backpack_cell_1_magic = update_package["equipment_magic"]
+				self.backpack_cell_1_armour = update_package["equipment_armour"]
+				self.backpack_cell_1_health = update_package["equipment_health"]
+			elif self.package_type == "backpack_cell_2":
+				self.backpack_cell_2_name = update_package["equipment_name"]
+				self.backpack_cell_2_type = update_package["equipment_type"]
+				self.backpack_cell_2_speed = update_package["equipment_speed"]
+				self.backpack_cell_2_brawn = update_package["equipment_brawn"]
+				self.backpack_cell_2_magic = update_package["equipment_magic"]
+				self.backpack_cell_2_armour = update_package["equipment_armour"]
+				self.backpack_cell_2_health = update_package["equipment_health"]
+			elif self.package_type == "backpack_cell_3":
+				self.backpack_cell_3_name = update_package["equipment_name"]
+				self.backpack_cell_3_type = update_package["equipment_type"]
+				self.backpack_cell_3_speed = update_package["equipment_speed"]
+				self.backpack_cell_3_brawn = update_package["equipment_brawn"]
+				self.backpack_cell_3_magic = update_package["equipment_magic"]
+				self.backpack_cell_3_armour = update_package["equipment_armour"]
+				self.backpack_cell_3_health = update_package["equipment_health"]
+			elif self.package_type == "backpack_cell_4":
+				self.backpack_cell_4_name = update_package["equipment_name"]
+				self.backpack_cell_4_type = update_package["equipment_type"]
+				self.backpack_cell_4_speed = update_package["equipment_speed"]
+				self.backpack_cell_4_brawn = update_package["equipment_brawn"]
+				self.backpack_cell_4_magic = update_package["equipment_magic"]
+				self.backpack_cell_4_armour = update_package["equipment_armour"]
+				self.backpack_cell_4_health = update_package["equipment_health"]
+			elif self.package_type == "backpack_cell_5":
+				self.backpack_cell_5_name = update_package["equipment_name"]
+				self.backpack_cell_5_type = update_package["equipment_type"]
+				self.backpack_cell_5_speed = update_package["equipment_speed"]
+				self.backpack_cell_5_brawn = update_package["equipment_brawn"]
+				self.backpack_cell_5_magic = update_package["equipment_magic"]
+				self.backpack_cell_5_armour = update_package["equipment_armour"]
+				self.backpack_cell_5_health = update_package["equipment_health"]
+		except ValueError:
+			print(f'Unknown type of package {self.package_type}')
 
-		else:
-			self.update_characteristics(update_package, direction)
-			# self.cloak_name = ""
-			# self.cloak_type = ""
-		return True
 
 	def player_2_json(self):
 		""" Для сериализации объекта Player в json при сохранении файла героя """
@@ -425,13 +469,11 @@ class Player:
 			"name": self.name,
 			"path": self.path,
 			"career": self.career,
-			"characteristics": {
-				"speed": self.speed,
-				"brawn": self.brawn,
-				"magic": self.magic,
-				"armour": self.armour,
-				"health": self.health
-			},
+			"original_speed": self.speed,
+			"original_brawn": self.brawn,
+			"original_magic": self.magic,
+			"original_armour": self.armour,
+			"original_health": self.health,
 			"money_pouch": 0,
 			"equipment": {
 				"cloak": {
