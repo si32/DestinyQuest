@@ -231,7 +231,6 @@ empty_hero = {
 	}
 	}
 
-
 # Класс героя, чтобы иметь доступ к атрибутам через точку, а не как json ["attr"]
 class Player:
 	def __init__(self, hero=empty_hero):
@@ -509,11 +508,11 @@ class Player:
 			"name": self.name,
 			"path": self.path,
 			"career": self.career,
-			"original_speed": self.speed,
-			"original_brawn": self.brawn,
-			"original_magic": self.magic,
-			"original_armour": self.armour,
-			"original_health": self.health,
+			"original_speed": self.original_speed,
+			"original_brawn": self.original_brawn,
+			"original_magic": self.original_magic,
+			"original_armour": self.original_armour,
+			"original_health": self.original_health,
 			"money_pouch": 0,
 			"equipment": {
 				"cloak": {
@@ -716,7 +715,7 @@ class Player:
 					"equipment_health" : self.backpack_cell_5_health,
 				}
 			},
-			"notes": "",
+			"notes": self.notes,
 			"special_abilities": {
 			"speed_special_abilities": {
 			"speed_special_ability_name": "",

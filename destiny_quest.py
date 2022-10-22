@@ -513,7 +513,7 @@ class DestinyQuest:
         self.outfit_field.grid(row=0, sticky="nsew")
         self.backpack_field.grid(row=1, sticky="nsew")
 
-        # Cloak💎
+        # Cloak
         self.cloak_lbl = tk.Label(master=self.outfit_field, text="Cloak:", font=FONT_EQUIPMENT_LBL, bg=COLOR_EQUIPMENT, anchor="n")
         self.cloak_value_lbl = tk.Label(
             master=self.outfit_field, wraplength=WRAP_EQUIPMENT_VALUE_LBL, text=self.player.cloak_name, font=FONT_EQUIPMENT_VALUE_LBL, bg=COLOR_EQUIPMENT, height=2, anchor="n")
@@ -758,7 +758,7 @@ class EquipmentWindow(tk.Toplevel):
 
     def operate_puton_apply_btn(self):
         """ Обработка нажатия кнопки "Put on\Apply" """
-        puton_values = ["cloak", "head", "gloves", "ring", "necklace", "right_hand", "chest", "left_hand", "talisman", "feet"]
+        puton_values = ["cloak", "head", "gloves", "ring_1", "necklace", "ring_2", "right_hand", "chest", "left_hand", "talisman", "feet"]
         if self.state == "disabled" and self.id_cell in puton_values:
             self.destroy()
             return
@@ -769,12 +769,14 @@ class EquipmentWindow(tk.Toplevel):
         if self.update_package["equipment_type"] == self.id_cell:
             self.player.update_player(self.id_cell, self.update_package)
             self.destroy()
+            return
         if self.update_package["equipment_type"] in puton_values:
             if self.is_empty_equipment_cell(self.update_package["equipment_type"]):
                 self.player.update_player(self.update_package["equipment_type"], self.update_package)
                 # Очистить ячейку рюкзака
                 self.clear_cell()
                 self.destroy()
+                return
             else:
                 info_msg = tk.messagebox.showinfo(title="Info", message=f'You have already put on {self.update_package["equipment_type"]} equipment. Put it in your backpack first or throw it away')
         # Значит зелье. Необходимо применить один раз
@@ -793,7 +795,6 @@ class EquipmentWindow(tk.Toplevel):
         if self.state == "disabled":
             self.clear_cell()
         self.destroy()
-        print("throw away!")
 
     def find_empty_backpack_cell(self):
         """ Find empty space in backpack to add new equipment """
@@ -887,7 +888,7 @@ class EquipmentWindow(tk.Toplevel):
         self.equipment_type_lst = ttk.Combobox(self.equipment_stats_field,
         values = [
             "cloak", "head","gloves",
-            "ring", "necklace",
+            "ring_1", "necklace", "ring_2",
             "right_hand", "chest", "left_hand",
             "talisman", "feet",
             "potion", "other"
