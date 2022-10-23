@@ -321,24 +321,25 @@ class DestinyQuest:
         self.hero_career_lbl = tk.Label(self.stats_hero_field, text=f"{self.player.career}", font=FONT_STATS)
         self.hero_path_lbl.grid(row=1, column=0, columnspan=5, sticky="w")
         self.hero_career_lbl.grid(row=1, column=4, columnspan=5, sticky="w")
+
         self.hero_speed_icon_lbl = tk.Label(self.stats_hero_field, text=f"{ICON_SPEED}", font=FONT_STATS)
-        self.hero_speed_lbl = tk.Label(self.stats_hero_field, text=f"{self.player.speed}", font=FONT_STATS)
+        self.hero_speed_lbl = tk.Label(self.stats_hero_field, text=f"{self.player.speed + self.player.speed_modifier}", font=FONT_STATS)
         self.hero_speed_icon_lbl.grid(row=2, column=0, sticky="e")
         self.hero_speed_lbl.grid(row=2, column=1, sticky="w")
         self.hero_brawn_icon_lbl = tk.Label(self.stats_hero_field, text=f"{ICON_BRAWN}", font=FONT_STATS)
-        self.hero_brawn_lbl = tk.Label(self.stats_hero_field, text=f"{self.player.brawn}", font=FONT_STATS)
+        self.hero_brawn_lbl = tk.Label(self.stats_hero_field, text=f"{self.player.brawn + self.player.brawn_modifier}", font=FONT_STATS)
         self.hero_brawn_icon_lbl.grid(row=2, column=2, sticky="e")
         self.hero_brawn_lbl.grid(row=2, column=3, sticky="w")
         self.hero_magic_icon_lbl = tk.Label(self.stats_hero_field, text=f"{ICON_MAGIC}", font=FONT_STATS)
-        self.hero_magic_lbl = tk.Label(self.stats_hero_field, text=f"{self.player.magic}", font=FONT_STATS)
+        self.hero_magic_lbl = tk.Label(self.stats_hero_field, text=f"{self.player.magic + self.player.magic_modifier}", font=FONT_STATS)
         self.hero_magic_icon_lbl.grid(row=2, column=4, sticky="e")
         self.hero_magic_lbl.grid(row=2, column=5, sticky="w")
         self.hero_armour_icon_lbl = tk.Label(self.stats_hero_field, text=f"{ICON_ARMOUR}", font=FONT_STATS)
-        self.hero_armour_lbl = tk.Label(self.stats_hero_field, text=f"{self.player.armour}", font=FONT_STATS)
+        self.hero_armour_lbl = tk.Label(self.stats_hero_field, text=f"{self.player.armour + self.player.armour_modifier}", font=FONT_STATS)
         self.hero_armour_icon_lbl.grid(row=2, column=6, sticky="e")
         self.hero_armour_lbl.grid(row=2, column=7, sticky="w")
         self.hero_health_icon_lbl = tk.Label(self.stats_hero_field, text=f"{ICON_HEALTH}", fg="red", font=FONT_STATS)
-        self.hero_health_lbl = tk.Label(self.stats_hero_field, text=f"{self.player.health}", font=FONT_STATS)
+        self.hero_health_lbl = tk.Label(self.stats_hero_field, text=f"{self.player.health + self.player.health_modifier}", font=FONT_STATS)
         self.hero_health_icon_lbl.grid(row=2, column=8, sticky="e")
         self.hero_health_lbl.grid(row=2, column=9, sticky="w")
         # Чтобы отодвинуть колонки статистики врага
@@ -759,18 +760,21 @@ class EquipmentWindow(tk.Toplevel):
     def operate_puton_apply_btn(self):
         """ Обработка нажатия кнопки "Put on\Apply" """
         puton_values = ["cloak", "head", "gloves", "ring_1", "necklace", "ring_2", "right_hand", "chest", "left_hand", "talisman", "feet"]
+        # Если открыли уже надетое оборудование, то просто закрыть
         if self.state == "disabled" and self.id_cell in puton_values:
             self.destroy()
             return
+        # Если нет имени, то ничего не делать, пока не будет имя оборудования
         if not self.is_equipment_name():
             self.equipment_name_ent.config(bg="red")
             return
+
         self.update_package = self.get_update_package()
         if self.update_package["equipment_type"] == self.id_cell:
             self.player.update_player(self.id_cell, self.update_package)
             self.destroy()
             return
-        if self.update_package["equipment_type"] in puton_values:
+        elif self.update_package["equipment_type"] in puton_values:
             if self.is_empty_equipment_cell(self.update_package["equipment_type"]):
                 self.player.update_player(self.update_package["equipment_type"], self.update_package)
                 # Очистить ячейку рюкзака
@@ -781,8 +785,11 @@ class EquipmentWindow(tk.Toplevel):
                 info_msg = tk.messagebox.showinfo(title="Info", message=f'You have already put on {self.update_package["equipment_type"]} equipment. Put it in your backpack first or throw it away')
         # Значит зелье. Необходимо применить один раз
         else:
-            # self.activate_state("active")
-            pass
+            self.player.update_modifiers(self.update_package)
+            # Очистить ячейку рюкзака
+            self.clear_cell()
+            self.destroy()
+            return
 
     def clear_cell(self):
         """ Clear equipment cell """
@@ -850,7 +857,7 @@ class EquipmentWindow(tk.Toplevel):
                     # Снять с себя одетую вещь
                     self.clear_cell()
                     self.destroy()
-
+# =============================================================================================================================
     def init_gui(self):
         """ Create window GUI """
         # Create mainframe

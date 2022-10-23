@@ -2,7 +2,7 @@
 empty_hero = {
 	"name": "Новый герой",
 	"path": "Mage",
-	"career": "",
+	"career": "Assasin",
 	"original_speed": 0,
 	"original_brawn": 0,
 	"original_magic": 0,
@@ -357,6 +357,12 @@ class Player:
 		self.backpack_cell_5_armour = hero["equipment"]["backpack_cell_5"]["equipment_armour"]
 		self.backpack_cell_5_health = hero["equipment"]["backpack_cell_5"]["equipment_health"]
 		self.notes = hero["notes"]
+		# Temporary modifaiers (when you drink poition)
+		self.speed_modifier = 0
+		self.brawn_modifier = 0
+		self.magic_modifier = 0
+		self.armour_modifier = 0
+		self.health_modifier = 0
 		# stats
 		self.update_stats()
 
@@ -366,6 +372,14 @@ class Player:
 		self.magic =  self.original_magic + self.cloak_magic + self.head_magic + self.gloves_magic + self.ring_1_magic + self.necklace_magic + self.ring_2_magic + self.right_hand_magic + self.chest_magic + self.left_hand_magic + self.talisman_magic + self.feet_magic
 		self.armour = self.original_armour + self.cloak_armour + self.head_armour + self.gloves_armour + self.ring_1_armour + self.necklace_armour + self.ring_2_armour + self.right_hand_armour + self.chest_armour + self.left_hand_armour + self.talisman_armour + self.feet_armour
 		self.health = self.original_health + self.cloak_health + self.head_health + self.gloves_health + self.ring_1_health + self.necklace_health + self.ring_2_health + self.right_hand_health + self.chest_health + self.left_hand_health + self.talisman_health + self.feet_health
+
+	def update_modifiers(self, update_package: dict):
+		""" Update modifiers (when you drink some poitions) """
+		self.speed_modifier = update_package["equipment_speed"]
+		self.brawn_modifier = update_package["equipment_brawn"]
+		self.magic_modifier = update_package["equipment_magic"]
+		self.armour_modifier = update_package["equipment_armour"]
+		self.health_modifier = update_package["equipment_health"]
 
 	def update_player(self, id_cell, update_package:dict):
 		""" Update player equipment """
