@@ -191,8 +191,6 @@ class DestinyQuest:
             self.player.battle_damage += self.damage + self.temp_special_damage
             self.stats_hero_field.grid_forget()
             self.create_stats_hero_field()
-            self.hero_health_icon_lbl["text"] = ICON_BROKEN_HEART
-            self.hero_health_lbl["fg"] = "red"
         elif player == "enemy":
             self.enemy_health_ent.delete(0, tk.END)
             self.enemy_health_ent.insert(0, str(self.health - self.damage))
@@ -334,8 +332,16 @@ class DestinyQuest:
         self.hero_armour_lbl = tk.Label(self.stats_hero_field, text=f"{self.player.armour + self.player.armour_modifier}", font=FONT_STATS)
         self.hero_armour_icon_lbl.grid(row=2, column=6, sticky="e")
         self.hero_armour_lbl.grid(row=2, column=7, sticky="w")
-        self.hero_health_icon_lbl = tk.Label(self.stats_hero_field, text=f"{ICON_HEALTH}", fg="red", font=FONT_STATS)
-        self.hero_health_lbl = tk.Label(self.stats_hero_field, text=f"{self.player.health + self.player.health_modifier - self.player.battle_damage}", font=FONT_STATS)
+        icon = tk.StringVar()
+        if self.player.battle_damage == 0:
+            icon.set(ICON_HEALTH)
+        else:
+            icon.set(ICON_BROKEN_HEART)
+        self.hero_health_icon_lbl = tk.Label(self.stats_hero_field, text=icon.get(), fg="red", font=FONT_STATS)
+        # Если действует модификатор (выпито зелье), то цвет сердца зеленый
+        if (self.player.speed_modifier or self.player.brawn_modifier or self.player.magic_modifier or self.player.armour_modifier or self.player.health_modifier) > 0:
+            self.hero_health_icon_lbl.configure(fg="green")
+        self.hero_health_lbl = tk.Label(self.stats_hero_field, text=f"{self.player.health + self.player.health_modifier - self.player.battle_damage}", fg="red", font=FONT_STATS)
         self.hero_health_icon_lbl.grid(row=2, column=8, sticky="e")
         self.hero_health_lbl.grid(row=2, column=9, sticky="w")
         # Чтобы отодвинуть колонки статистики врага
