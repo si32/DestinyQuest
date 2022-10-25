@@ -165,18 +165,18 @@ empty_hero = {
 			}
 		},
 		"backpack_cell_1": {
-			"equipment_name": "",
-			"equipment_type": "",
+			"equipment_name": "Зелье здоровья",
+			"equipment_type": "poition",
 			"equipment_speed": 0,
 			"equipment_brawn": 0,
 			"equipment_magic": 0,
 			"equipment_armour": 0,
-			"equipment_health": 0
+			"equipment_health": 5
 		},
 		"backpack_cell_2": {
-			"equipment_name": "",
-			"equipment_type": "",
-			"equipment_speed": 0,
+			"equipment_name": "Зелье ловкости",
+			"equipment_type": "poition",
+			"equipment_speed": 2,
 			"equipment_brawn": 0,
 			"equipment_magic": 0,
 			"equipment_armour": 0,
@@ -365,6 +365,14 @@ class Player:
 		self.health_modifier = 0
 		# stats
 		self.update_stats()
+		# battle damage
+		self.battle_damage = 0
+		# modifiers
+		self.speed_modifier = 0
+		self.brawn_modifier = 0
+		self.magic_modifier = 0
+		self.armour_modifier = 0
+		self.health_modifier = 0
 
 	def update_stats(self):
 		self.speed =  self.original_speed + self.cloak_speed + self.head_speed + self.gloves_speed + self.ring_1_speed + self.necklace_speed + self.ring_2_speed + self.right_hand_speed + self.chest_speed + self.left_hand_speed + self.talisman_speed + self.feet_speed
@@ -375,11 +383,11 @@ class Player:
 
 	def update_modifiers(self, update_package: dict):
 		""" Update modifiers (when you drink some poitions) """
-		self.speed_modifier = update_package["equipment_speed"]
-		self.brawn_modifier = update_package["equipment_brawn"]
-		self.magic_modifier = update_package["equipment_magic"]
-		self.armour_modifier = update_package["equipment_armour"]
-		self.health_modifier = update_package["equipment_health"]
+		self.speed_modifier += update_package["equipment_speed"]
+		self.brawn_modifier += update_package["equipment_brawn"]
+		self.magic_modifier += update_package["equipment_magic"]
+		self.armour_modifier += update_package["equipment_armour"]
+		self.health_modifier += update_package["equipment_health"]
 
 	def update_player(self, id_cell, update_package:dict):
 		""" Update player equipment """

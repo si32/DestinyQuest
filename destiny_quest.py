@@ -130,21 +130,24 @@ class DestinyQuest:
         self.hero_dices_result_lbl["bg"] = COLOR_REFRESH
         self.enemy_dices_result_lbl["bg"] = COLOR_REFRESH
 
-    def refresh_hero_health(self):
+    def refresh_hero(self):
         """ Обнулить значение здоровья после битвы """
-        self.hero_health_lbl["text"] = self.player.health
-        self.hero_health_lbl["fg"] = "black"
-        self.hero_health_icon_lbl["text"] = ICON_HEALTH
+        self.player.speed_modifier = 0
+        self.player.brawn_modifier = 0
+        self.player.magic_modifier = 0
+        self.player.armour_modifier = 0
+        self.player.health_modifier = 0
+        self.player.battle_damage = 0
+        self.stats_hero_field.grid_forget()
+        self.create_stats_hero_field()
+        # self.hero_health_lbl["fg"] = "black"
+        # self.hero_health_icon_lbl["text"] = ICON_HEALTH
 
-    def refresh_enemy(self):
-        """ Обнулить все характеристики врага после боя """
-        self.enemy_speed_ent.delete(0, tk.END)
-        self.enemy_brawn_ent.delete(0, tk.END)
-        self.enemy_magic_ent.delete(0, tk.END)
-        self.enemy_armour_ent.delete(0, tk.END)
-        self.enemy_health_ent.delete(0, tk.END)
-        self.enemy_special_ability_name_ent.delete(0, tk.END)
-        self.enemy_special_ability_ent.delete(0, tk.END)
+    def refresh_stats(self):
+        """ Обнулить все характеристики врага и героя после боя """
+        self.stats_enemy_field.grid_forget()
+        self.create_stats_enemy_field()
+        self.refresh_hero()
 
     @staticmethod
     def get_dices(dices):
@@ -167,7 +170,7 @@ class DestinyQuest:
                 self.health = 0
         # Узнать показатели брони
         if player == "hero":
-            self.armour = self.player.armour
+            self.armour = int(self.hero_armour_lbl["text"])
         elif player == "enemy":
             try:
                 self.armour = int(self.enemy_armour_ent.get())
@@ -180,26 +183,19 @@ class DestinyQuest:
             self.damage = 0
         # Уменьшить здоровье
         if player == "hero":
-            # temporary (for each battte) health
-            self.temp_health = self.health - self.damage
-            # Применить специальные способности
+            # Применить специальные способности врага
             try:
                 self.temp_special_damage = int(self.enemy_special_ability_ent.get())
             except ValueError:
                 self.temp_special_damage = 0
-            self.temp_health -= self.temp_special_damage
-
-            self.hero_health_lbl["text"] = self.temp_health
+            self.player.battle_damage += self.damage + self.temp_special_damage
+            self.stats_hero_field.grid_forget()
+            self.create_stats_hero_field()
             self.hero_health_icon_lbl["text"] = ICON_BROKEN_HEART
             self.hero_health_lbl["fg"] = "red"
         elif player == "enemy":
             self.enemy_health_ent.delete(0, tk.END)
             self.enemy_health_ent.insert(0, str(self.health - self.damage))
-            # Применить специальные способности
-
-    def update_all_labels(self):
-        # Может сделать одну функцию, которая убивает класс всей программы и создаеь новый, чтобы все обновилось, а как сохранить все что наиграл?
-        pass
 
     def get_result(self, dices, player, test):
         """ Подсчитать результат после броска кубиков с учетом модификаторов """
@@ -223,12 +219,12 @@ class DestinyQuest:
             "armour": ICON_ARMOUR,
             }
         test_hero_modifiers = {
-            "agility": self.player.speed,
-            "attack": (self.player.brawn, self.player.magic),
-            "speed": self.player.speed,
-            "brawn": self.player.brawn,
-            "magic": self.player.magic,
-            "armour": self.player.armour,
+            "agility": self.player.speed + self.player.speed_modifier,
+            "attack": (self.player.brawn + self.player.brawn_modifier, self.player.magic + self.player.magic_modifier),
+            "speed": self.player.speed + self.player.speed_modifier,
+            "brawn": self.player.brawn + self.player.brawn_modifier,
+            "magic": self.player.magic + self.player.magic_modifier,
+            "armour": self.player.armour + self.player.armour_modifier,
             }
         test_enemy_modifiers = {
             "agility": self.enemy_speed_ent.get(),
@@ -339,7 +335,7 @@ class DestinyQuest:
         self.hero_armour_icon_lbl.grid(row=2, column=6, sticky="e")
         self.hero_armour_lbl.grid(row=2, column=7, sticky="w")
         self.hero_health_icon_lbl = tk.Label(self.stats_hero_field, text=f"{ICON_HEALTH}", fg="red", font=FONT_STATS)
-        self.hero_health_lbl = tk.Label(self.stats_hero_field, text=f"{self.player.health + self.player.health_modifier}", font=FONT_STATS)
+        self.hero_health_lbl = tk.Label(self.stats_hero_field, text=f"{self.player.health + self.player.health_modifier - self.player.battle_damage}", font=FONT_STATS)
         self.hero_health_icon_lbl.grid(row=2, column=8, sticky="e")
         self.hero_health_lbl.grid(row=2, column=9, sticky="w")
         # Чтобы отодвинуть колонки статистики врага
@@ -351,7 +347,7 @@ class DestinyQuest:
         self.hero_magic_lbl.bind("<Button-1>", lambda e: self.get_result(dices=2, player="hero", test="magic"))
         self.hero_armour_lbl.bind("<Button-1>", lambda e: self.get_result(dices=2, player="hero", test="armour"))
         # refresh hero health after battle
-        self.hero_health_lbl.bind("<Button-1>", lambda e: self.refresh_hero_health())
+        self.hero_health_lbl.bind("<Button-1>", lambda e: self.refresh_hero())
 
     def create_stats_enemy_field(self):
         self.stats_enemy_field = tk.Frame(self.stats_field)
@@ -389,7 +385,7 @@ class DestinyQuest:
         self.enemy_health_ent = tk.Entry(self.stats_enemy_field, width=2, font=FONT_STATS)
         self.enemy_health_ent.grid(row=2, column=9, sticky="ew")
         # refresh enemy stats after battle
-        self.enemy_name_lbl.bind("<Button-1>", lambda e: self.refresh_enemy())
+        self.enemy_name_lbl.bind("<Button-1>", lambda e: self.refresh_stats())
 
     def create_stats_field(self):
         """ Top general statistic field """
@@ -397,7 +393,6 @@ class DestinyQuest:
         self.stats_field = tk.Frame(self.mainframe)
         self.stats_field.rowconfigure(0, weight=1)
         self.stats_field.columnconfigure(0, weight=1)
-        # какая строка верх или низ правильная?
         self.stats_field.columnconfigure(1, weight=1)
         self.stats_field.grid(row=0, sticky="nsew")
         self.create_stats_hero_field()
@@ -675,6 +670,10 @@ class DestinyQuest:
             opened_window.pop(self.id_cell)
         self.equipment_window.destroy()
         # Update windows fields (but firstly must forget the previuos ones)
+        print(f"{self.player.health + self.player.health_modifier - self.player.battle_damage}")
+        print(f"self.player.health:{self.player.health}")
+        print(f"self.player.health_modifier:{self.player.health_modifier}")
+        print(f"self.player.battle_damage:{self.player.battle_damage}")
         self.stats_hero_field.grid_forget()
         self.equipment_field.grid_forget()
         self.create_stats_hero_field()
@@ -777,6 +776,7 @@ class EquipmentWindow(tk.Toplevel):
         elif self.update_package["equipment_type"] in puton_values:
             if self.is_empty_equipment_cell(self.update_package["equipment_type"]):
                 self.player.update_player(self.update_package["equipment_type"], self.update_package)
+
                 # Очистить ячейку рюкзака
                 self.clear_cell()
                 self.destroy()
@@ -786,6 +786,7 @@ class EquipmentWindow(tk.Toplevel):
         # Значит зелье. Необходимо применить один раз
         else:
             self.player.update_modifiers(self.update_package)
+            print("drink!", self.update_package)
             # Очистить ячейку рюкзака
             self.clear_cell()
             self.destroy()
