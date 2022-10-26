@@ -140,8 +140,6 @@ class DestinyQuest:
         self.player.battle_damage = 0
         self.stats_hero_field.grid_forget()
         self.create_stats_hero_field()
-        # self.hero_health_lbl["fg"] = "black"
-        # self.hero_health_icon_lbl["text"] = ICON_HEALTH
 
     def refresh_stats(self):
         """ Обнулить все характеристики врага и героя после боя """
@@ -310,12 +308,10 @@ class DestinyQuest:
         self.hero_name_lbl = tk.Label(self.stats_hero_field, text=f"{self.player.name}", fg="blue", font=FONT_STATS)
         self.hero_name_icon_lbl.grid(row=0, column=0, sticky="w")
         self.hero_name_lbl.grid(row=0, column=1, columnspan=10, sticky="w")
-
         self.hero_path_lbl = tk.Label(self.stats_hero_field, text=f"{self.player.path}", font=FONT_STATS)
         self.hero_career_lbl = tk.Label(self.stats_hero_field, text=f"{self.player.career}", font=FONT_STATS)
         self.hero_path_lbl.grid(row=1, column=0, columnspan=5, sticky="w")
         self.hero_career_lbl.grid(row=1, column=4, columnspan=5, sticky="w")
-
         self.hero_speed_icon_lbl = tk.Label(self.stats_hero_field, text=f"{ICON_SPEED}", font=FONT_STATS)
         self.hero_speed_lbl = tk.Label(self.stats_hero_field, text=f"{self.player.speed + self.player.speed_modifier}", font=FONT_STATS)
         self.hero_speed_icon_lbl.grid(row=2, column=0, sticky="e")
@@ -354,6 +350,8 @@ class DestinyQuest:
         self.hero_armour_lbl.bind("<Button-1>", lambda e: self.get_result(dices=2, player="hero", test="armour"))
         # refresh hero health after battle
         self.hero_health_lbl.bind("<Button-1>", lambda e: self.refresh_hero())
+        # edit hero's name, path, carier
+        self.hero_name_lbl.bind("<Button-1>", lambda e: self.open_edit_hero_name_window())
 
     def create_stats_enemy_field(self):
         self.stats_enemy_field = tk.Frame(self.stats_field)
@@ -696,6 +694,18 @@ class DestinyQuest:
             pass
         return self.equip
 
+    def open_edit_hero_name_window(self):
+        self.edit_hero_name_window = EditNameWindow(self.player)
+        # Запретить пользователю взаимодействовать с основным окном
+        self.edit_hero_name_window.grab_set()
+        # Реагировать только на событие дестроя всего окна, а не каждого его виджета
+        self.edit_hero_name_window.bind("<Destroy>", lambda e:self.close_edit_hero_name_window() if e.widget == self.edit_hero_name_window else None)
+
+    def close_edit_hero_name_window(self):
+        self.edit_hero_name_window.destroy()
+        self.stats_hero_field.grid_forget()
+        self.create_stats_hero_field()
+
 
 class EquipmentWindow(tk.Toplevel):
     """ Class for creating a new window for any equipment cell """
@@ -945,8 +955,63 @@ class EquipmentWindow(tk.Toplevel):
         self.in_backpack_btn.grid(row=0, column=2, sticky="nsew", padx=5)
         # Activate state of window
         self.activate_state(self.state)
-
 # =============================================================================================================================
+
+
+def edit_hero_name(self):
+    pass
+
+class EditNameWindow(tk.Toplevel):
+    """ Window for editing hero's name, path, career """
+    def __init__(self, player):
+        super().__init__()
+        self.player = player
+        self.title(f"Edit Hero's name, path, career")
+        self.resizable(False,False)
+        self.init_gui()
+
+    def init_gui(self):
+        """ Create window GUI """
+        # Create mainframe
+        self.mainframe = tk.Frame(self)
+        self.mainframe.rowconfigure([0, 1], weight=1)
+        self.mainframe.columnconfigure(0, weight=1)
+        # Create edit hero frame
+        self.edit_hero_field = tk.Frame(self.mainframe)
+        self.edit_hero_field.rowconfigure([0, 1], weight=1)
+        self.edit_hero_field.columnconfigure([0, 1, 2, 3], weight=1)
+        # Create buttons frame
+        self.buttons_field = tk.Frame(self.mainframe)
+        self.buttons_field.rowconfigure(0, weight=1)
+        self.buttons_field.columnconfigure([0, 1], weight=1)
+        # Frames grid
+        self.mainframe.grid(padx=3)
+        self.edit_hero_field.grid(row=0, sticky="nsew", padx=5, pady=5)
+        self.buttons_field.grid(row=1, sticky="nsew", padx=5, pady=(10,5))
+        # Edit hero
+        self.hero_name_lbl = tk.Label(self.edit_hero_field, text="Name:", font=FONT_STATS)
+        self.hero_name_lbl.grid(row=0, column=0, sticky="nw")
+        self.hero_name_ent = tk.Entry(self.edit_hero_field, font=FONT_EQUIPMENT_VALUE_LBL)
+        self.hero_name_ent.grid(row=0, sticky="nwe", column=1, columnspan=3)
+        self.hero_name_ent.insert(0, "Новый герой")
+        self.hero_path_lbl = tk.Label(self.edit_hero_field, text="Path:", font=FONT_STATS)
+        self.hero_path_lbl.grid(row=1, column=0, sticky="nw")
+        self.hero_path_lst = ttk.Combobox(self.edit_hero_field, values = ["None", "Mage","Warrior"], state="readonly")
+        self.hero_path_lst.set("None")
+        self.hero_path_lst.grid(row=1, column=1, sticky="nw")
+        self.hero_career_lbl = tk.Label(self.edit_hero_field, text="Career:", font=FONT_STATS)
+        self.hero_career_lbl.grid(row=1, column=2, sticky="nw")
+        self.hero_career_ent = tk.Entry(self.edit_hero_field, font=FONT_EQUIPMENT_VALUE_LBL)
+        self.hero_career_ent.grid(row=1, column=3, sticky="nwe")
+        # Buttons
+        self.save_btn = tk.Button(master=self.buttons_field, text="Save")
+        self.cancel_btn = tk.Button(master=self.buttons_field, text="Cancel")
+        self.save_btn.grid(row=0, column=0, sticky="nsew", padx=5)
+        self.cancel_btn.grid(row=0, column=1, sticky="nsew", padx=5)
+
+
+
+
 def main():
     root = tk.Tk()
     DestinyQuest(root)
