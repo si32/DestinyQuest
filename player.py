@@ -1,8 +1,8 @@
 # Новый герой
 empty_hero = {
 	"name": "Новый герой",
-	"path": "Mage",
-	"career": "Assasin",
+	"path": "",
+	"career": "",
 	"original_speed": 0,
 	"original_brawn": 0,
 	"original_magic": 0,

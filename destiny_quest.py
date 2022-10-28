@@ -21,6 +21,7 @@ FONT_EQUIPMENT_VALUE_LBL = ("Courier New", 10)
 # Через 40 мм переносить текст на другую строку в label
 WRAP_EQUIPMENT_VALUE_LBL = "40m"
 
+PATH_LIST = ["None", "Mage","Warrior"]
 # BG_MAINFRAME = "#fce3ff"
 COLOR_AGILITY = "#c1f797"
 COLOR_ATTACK = "#e0807b"
@@ -308,10 +309,8 @@ class DestinyQuest:
         self.hero_name_lbl = tk.Label(self.stats_hero_field, text=f"{self.player.name}", fg="blue", font=FONT_STATS)
         self.hero_name_icon_lbl.grid(row=0, column=0, sticky="w")
         self.hero_name_lbl.grid(row=0, column=1, columnspan=10, sticky="w")
-        self.hero_path_lbl = tk.Label(self.stats_hero_field, text=f"{self.player.path}", font=FONT_STATS)
-        self.hero_career_lbl = tk.Label(self.stats_hero_field, text=f"{self.player.career}", font=FONT_STATS)
-        self.hero_path_lbl.grid(row=1, column=0, columnspan=5, sticky="w")
-        self.hero_career_lbl.grid(row=1, column=4, columnspan=5, sticky="w")
+        self.hero_path_career_lbl = tk.Label(self.stats_hero_field, text=f"{self.player.path} - {self.player.career}", font=FONT_STATS)
+        self.hero_path_career_lbl.grid(row=1, column=0, columnspan=10, sticky="w")
         self.hero_speed_icon_lbl = tk.Label(self.stats_hero_field, text=f"{ICON_SPEED}", font=FONT_STATS)
         self.hero_speed_lbl = tk.Label(self.stats_hero_field, text=f"{self.player.speed + self.player.speed_modifier}", font=FONT_STATS)
         self.hero_speed_icon_lbl.grid(row=2, column=0, sticky="e")
@@ -970,6 +969,33 @@ class EditNameWindow(tk.Toplevel):
         self.resizable(False,False)
         self.init_gui()
 
+    def is_hero_name(self):
+        """ Check if hero name is not empty """
+        self.name = self.hero_name_ent.get()
+        # Must have at least one visiable character
+        if self.name:
+            for c in self.name:
+                if c.isalnum():
+                    return True
+            return False
+        else:
+            return False
+
+    def operate_save_btn(self):
+        self.name = self.hero_name_ent.get()
+        self.path = self.hero_path_lst.get()
+        self.career = self.hero_career_ent.get()
+        if not self.is_hero_name():
+            self.hero_name_ent.config(bg="red")
+            return
+        if self.path not in PATH_LIST:
+            tk.messagebox.showinfo(title="Info", message=f'Your hero path {self.path} is not valid!')
+            return
+        self.player.name = self.name
+        self.player.path = self.path
+        self.player.career = self.career
+        self.destroy()
+
     def init_gui(self):
         """ Create window GUI """
         # Create mainframe
@@ -993,23 +1019,22 @@ class EditNameWindow(tk.Toplevel):
         self.hero_name_lbl.grid(row=0, column=0, sticky="nw")
         self.hero_name_ent = tk.Entry(self.edit_hero_field, font=FONT_EQUIPMENT_VALUE_LBL)
         self.hero_name_ent.grid(row=0, sticky="nwe", column=1, columnspan=3)
-        self.hero_name_ent.insert(0, "Новый герой")
+        self.hero_name_ent.insert(0, self.player.name)
         self.hero_path_lbl = tk.Label(self.edit_hero_field, text="Path:", font=FONT_STATS)
         self.hero_path_lbl.grid(row=1, column=0, sticky="nw")
-        self.hero_path_lst = ttk.Combobox(self.edit_hero_field, values = ["None", "Mage","Warrior"], state="readonly")
-        self.hero_path_lst.set("None")
+        self.hero_path_lst = ttk.Combobox(self.edit_hero_field, values = PATH_LIST, state="readonly")
+        self.hero_path_lst.set(self.player.path)
         self.hero_path_lst.grid(row=1, column=1, sticky="nw")
         self.hero_career_lbl = tk.Label(self.edit_hero_field, text="Career:", font=FONT_STATS)
         self.hero_career_lbl.grid(row=1, column=2, sticky="nw")
         self.hero_career_ent = tk.Entry(self.edit_hero_field, font=FONT_EQUIPMENT_VALUE_LBL)
+        self.hero_career_ent.insert(0, self.player.career)
         self.hero_career_ent.grid(row=1, column=3, sticky="nwe")
         # Buttons
-        self.save_btn = tk.Button(master=self.buttons_field, text="Save")
-        self.cancel_btn = tk.Button(master=self.buttons_field, text="Cancel")
+        self.save_btn = tk.Button(master=self.buttons_field, text="Save", command=self.operate_save_btn)
+        self.cancel_btn = tk.Button(master=self.buttons_field, text="Cancel", command=self.destroy)
         self.save_btn.grid(row=0, column=0, sticky="nsew", padx=5)
         self.cancel_btn.grid(row=0, column=1, sticky="nsew", padx=5)
-
-
 
 
 def main():
