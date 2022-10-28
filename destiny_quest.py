@@ -482,7 +482,6 @@ class DestinyQuest:
 
     def operate_equipment_btn(self):
         """ Обработка нажатия кнопки Equipment """
-        # Добавить сохранение в json всего что изменено
         if self._equipment_closed:
             self.create_equipment_field()
             self.equipment_btn["text"] = f"{ICON_MINUS}{ICON_BACKPACK}Equipment"
@@ -491,6 +490,11 @@ class DestinyQuest:
             self.equipment_field.grid_forget()
             self.equipment_btn["text"] = f"{ICON_PLUS}{ICON_BACKPACK}Equipment"
             self._equipment_closed = True
+
+    def save_notes(self, event):
+        """ Save notes if keys pressed """
+        self.notes = self.notes_txt.get(1.0, tk.END)
+        self.player.notes = self.notes
 
     def create_equipment_field(self):
         """ Equipment field """
@@ -506,7 +510,6 @@ class DestinyQuest:
         self.backpack_field = tk.Frame(self.equipment_field)
         self.backpack_field.rowconfigure([0, 1, 2, 3], weight=1)
         self.backpack_field.columnconfigure([0, 1, 2, 3, 4], weight=1)
-
         # Grid Frames
         self.equipment_field.grid(row=3, sticky="nsew")
         self.outfit_field.grid(row=0, sticky="nsew")
@@ -518,7 +521,6 @@ class DestinyQuest:
             master=self.outfit_field, wraplength=WRAP_EQUIPMENT_VALUE_LBL, text=self.player.cloak_name, font=FONT_EQUIPMENT_VALUE_LBL, bg=COLOR_EQUIPMENT, height=2, anchor="n")
         self.cloak_lbl.grid(row=0, column=0, sticky="nsew", pady=(2,0), padx=2)
         self.cloak_value_lbl.grid(row=1, column=0, sticky="nsew", padx=2)
-
         # Head
         self.head_lbl = tk.Label(master=self.outfit_field, text="Head:", font=FONT_EQUIPMENT_LBL, bg=COLOR_EQUIPMENT, anchor="n")
         self.head_value_lbl = tk.Label(master=self.outfit_field, wraplength=WRAP_EQUIPMENT_VALUE_LBL, text=self.player.head_name, font=FONT_EQUIPMENT_VALUE_LBL, bg=COLOR_EQUIPMENT, height=2, anchor="n")
@@ -607,6 +609,7 @@ class DestinyQuest:
         self.notes_lbl = tk.Label(master=self.backpack_field, text="Notes:", font=FONT_EQUIPMENT_LBL, anchor="nw")
         self.notes_lbl.grid(row=2, column=0, columnspan=5, sticky="nsew", padx=2)
         self.notes_txt = tk.Text(master=self.backpack_field, height=3)
+        self.notes_txt.insert(1.0, self.player.notes)
         self.notes_txt.grid(row=4, columnspan=5, sticky="nwse", padx=2, pady=2)
 
         #  Open equipment windows by click
@@ -639,6 +642,7 @@ class DestinyQuest:
         self.cell3_lbl.bind("<Button-1>", lambda e: self.open_equipment_window("Backpack cell 3:"))
         self.cell4_lbl.bind("<Button-1>", lambda e: self.open_equipment_window("Backpack cell 4:"))
         self.cell5_lbl.bind("<Button-1>", lambda e: self.open_equipment_window("Backpack cell 5:"))
+        self.notes_txt.bind("<KeyRelease>", self.save_notes)
 
 # =============================================================================================================================
     # Словарь открытых окон для каждого оборудования. Чтобы окно для каждого оборудования открывалось 1 раз.
