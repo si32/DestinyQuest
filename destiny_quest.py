@@ -20,8 +20,9 @@ FONT_EQUIPMENT_VALUE_LBL = ("Courier New", 10)
 
 # Через 40 мм переносить текст на другую строку в label
 WRAP_EQUIPMENT_VALUE_LBL = "40m"
-
 PATH_LIST = ["None", "Mage","Warrior"]
+# max money in the money pouch
+MAX_MONEY = 10000
 # BG_MAINFRAME = "#fce3ff"
 COLOR_AGILITY = "#c1f797"
 COLOR_ATTACK = "#e0807b"
@@ -45,6 +46,7 @@ ICON_ENEMY_SPECIAL_ABILITY = "\N{Skull}"
 ICON_BACKPACK = "\N{School Satchel}"
 ICON_PLUS = "\N{Heavy Plus Sign}"
 ICON_MINUS = "\N{Heavy Minus Sign}"
+ICON_MONEY_BAG = "\N{MONEY BAG}"
 
 class DestinyQuest:
     def __init__(self, root):
@@ -573,7 +575,7 @@ class DestinyQuest:
         self.feet_value_lbl.grid(row=7, column=1, sticky="nsew")
         # Money pouch
         self.money_pouch_lbl = tk.Label(master=self.outfit_field, text="Money pouch:", font=FONT_EQUIPMENT_LBL, bg=COLOR_EQUIPMENT, anchor="n")
-        self.money_pouch_value_lbl = tk.Label(master=self.outfit_field, wraplength=WRAP_EQUIPMENT_VALUE_LBL, text="", font=FONT_EQUIPMENT_VALUE_LBL, bg=COLOR_EQUIPMENT, height=2, anchor="n")
+        self.money_pouch_value_lbl = tk.Label(master=self.outfit_field, wraplength=WRAP_EQUIPMENT_VALUE_LBL, text=self.player.money_pouch, font=FONT_EQUIPMENT_VALUE_LBL, bg=COLOR_EQUIPMENT, height=2, anchor="n")
         self.money_pouch_lbl.grid(row=6, column=2, sticky="nsew", pady=(2,0), padx=2)
         self.money_pouch_value_lbl.grid(row=7, column=2, sticky="nsew", padx=2)
 
@@ -635,8 +637,8 @@ class DestinyQuest:
         self.talisman_value_lbl.bind("<Button-1>", lambda e: self.open_equipment_window(self.talisman_lbl["text"]))
         self.feet_lbl.bind("<Button-1>", lambda e: self.open_equipment_window(self.feet_lbl["text"]))
         self.feet_value_lbl.bind("<Button-1>", lambda e: self.open_equipment_window(self.feet_lbl["text"]))
-        self.money_pouch_lbl.bind("<Button-1>", lambda e: self.open_equipment_window(self.money_pouch_lbl["text"]))
-        self.money_pouch_value_lbl.bind("<Button-1>", lambda e: self.open_equipment_window(self.money_pouch_lbl["text"]))
+        self.money_pouch_lbl.bind("<Button-1>", self.open_money_pouch_window)
+        self.money_pouch_value_lbl.bind("<Button-1>", self.open_money_pouch_window)
         self.cell1_lbl.bind("<Button-1>", lambda e: self.open_equipment_window("Backpack cell 1:"))
         self.cell2_lbl.bind("<Button-1>", lambda e: self.open_equipment_window("Backpack cell 2:"))
         self.cell3_lbl.bind("<Button-1>", lambda e: self.open_equipment_window("Backpack cell 3:"))
@@ -709,7 +711,19 @@ class DestinyQuest:
         self.stats_hero_field.grid_forget()
         self.create_stats_hero_field()
 
+    def open_money_pouch_window(self, event):
+        self.money_pouch_window = MoneyPouchWindow(self.player)
+        # Запретить пользователю взаимодействовать с основным окном
+        self.money_pouch_window.grab_set()
+        # Реагировать только на событие дестроя всего окна, а не каждого его виджета
+        self.money_pouch_window.bind("<Destroy>", lambda e:self.close_money_pouch_window() if e.widget == self.money_pouch_window else None)
 
+    def close_money_pouch_window(self):
+        self.money_pouch_window.destroy()
+        self.equipment_field.grid_forget()
+        self.create_equipment_field()
+
+# =============================================================================================================================
 class EquipmentWindow(tk.Toplevel):
     """ Class for creating a new window for any equipment cell """
     def __init__(self, player, id_cell, equip: dict, state="active"):
@@ -877,7 +891,7 @@ class EquipmentWindow(tk.Toplevel):
                     # Снять с себя одетую вещь
                     self.clear_cell()
                     self.destroy()
-# =============================================================================================================================
+
     def init_gui(self):
         """ Create window GUI """
         # Create mainframe
@@ -959,11 +973,6 @@ class EquipmentWindow(tk.Toplevel):
         # Activate state of window
         self.activate_state(self.state)
 # =============================================================================================================================
-
-
-def edit_hero_name(self):
-    pass
-
 class EditNameWindow(tk.Toplevel):
     """ Window for editing hero's name, path, career """
     def __init__(self, player):
@@ -1039,7 +1048,55 @@ class EditNameWindow(tk.Toplevel):
         self.cancel_btn = tk.Button(master=self.buttons_field, text="Cancel", command=self.destroy)
         self.save_btn.grid(row=0, column=0, sticky="nsew", padx=5)
         self.cancel_btn.grid(row=0, column=1, sticky="nsew", padx=5)
+# =============================================================================================================================
+class MoneyPouchWindow(tk.Toplevel):
+    """ Window for editing money pouch """
+    def __init__(self, player):
+        super().__init__()
+        self.player = player
+        self.title(f"Money pouch")
+        self.resizable(False,False)
+        self.init_gui()
 
+    def operate_save_btn(self):
+        try:
+            self.money = int(self.money_pouch_sbx.get())
+            print(self.money)
+            self.player.money_pouch = self.money
+            self.destroy()
+        except ValueError:
+            tk.messagebox.showinfo(title="Info", message=f"It's not a number!")
+            return
+
+    def init_gui(self):
+        """ Create window GUI """
+        # Create mainframe
+        self.mainframe = tk.Frame(self)
+        self.mainframe.rowconfigure([0, 1], weight=1)
+        self.mainframe.columnconfigure(0, weight=1)
+        # Create edit hero frame
+        self.money_field = tk.Frame(self.mainframe)
+        self.money_field.rowconfigure(0, weight=1)
+        self.money_field.columnconfigure([0, 1], weight=1)
+        # Create buttons frame
+        self.buttons_field = tk.Frame(self.mainframe)
+        self.buttons_field.rowconfigure(0, weight=1)
+        self.buttons_field.columnconfigure([0, 1], weight=1)
+        # Frames grid
+        self.mainframe.grid(padx=3)
+        self.money_field.grid(row=0, sticky="nsew", padx=5, pady=5)
+        self.buttons_field.grid(row=1, sticky="nsew", padx=5, pady=(10,5))
+        # Edit money
+        self.money_pouch_lbl = tk.Label(self.money_field, text=f"{ICON_MONEY_BAG}", font=FONT_STATS)
+        self.money_pouch_lbl.grid(row=0, column=0, sticky="nw")
+        self.money_pouch_sbx = ttk.Spinbox(self.money_field, from_=0, to=MAX_MONEY, increment=1, font=FONT_EQUIPMENT_VALUE_LBL)
+        self.money_pouch_sbx.grid(row=0, sticky="nwe", column=1)
+        self.money_pouch_sbx.insert(0, self.player.money_pouch)
+        # Buttons
+        self.save_btn = tk.Button(master=self.buttons_field, text="Save", command=self.operate_save_btn)
+        self.cancel_btn = tk.Button(master=self.buttons_field, text="Cancel", command=self.destroy)
+        self.save_btn.grid(row=0, column=0, sticky="nsew", padx=5)
+        self.cancel_btn.grid(row=0, column=1, sticky="nsew", padx=5)
 
 def main():
     root = tk.Tk()
