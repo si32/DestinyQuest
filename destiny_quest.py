@@ -56,10 +56,7 @@ class DestinyQuest:
         self.root.resizable(False,False)
         # Open app with new hero
         self.player = Player(empty_hero)
-        # print(self.player.__dict__)
-
         self.init_gui()
-
         # Сохранять героя при закрытии приложения
         self.root.protocol("WM_DELETE_WINDOW", self.close_app)
 
@@ -660,9 +657,9 @@ class DestinyQuest:
             opened_window[self.id_cell] = 1
             # Если у героя нет еще оборудования, то на редактирование, а так только на посмотреть
             if self.equip["equipment_name"] == "":
-                self.equipment_window = EquipmentWindow(self.player, self.id_cell, self.equip, "active")
+                self.equipment_window = EquipmentWindow(self.root, self.player, self.id_cell, self.equip, "active")
             else:
-                self.equipment_window = EquipmentWindow(self.player, self.id_cell, self.equip, "disabled")
+                self.equipment_window = EquipmentWindow(self.root, self.player, self.id_cell, self.equip, "disabled")
 
             # Запретить пользователю взаимодействовать с основным окном
             self.equipment_window.grab_set()
@@ -679,10 +676,6 @@ class DestinyQuest:
             opened_window.pop(self.id_cell)
         self.equipment_window.destroy()
         # Update windows fields (but firstly must forget the previuos ones)
-        print(f"{self.player.health + self.player.health_modifier - self.player.battle_damage}")
-        print(f"self.player.health:{self.player.health}")
-        print(f"self.player.health_modifier:{self.player.health_modifier}")
-        print(f"self.player.battle_damage:{self.player.battle_damage}")
         self.stats_hero_field.grid_forget()
         self.equipment_field.grid_forget()
         self.create_stats_hero_field()
@@ -700,7 +693,7 @@ class DestinyQuest:
         return self.equip
 
     def open_edit_hero_name_window(self):
-        self.edit_hero_name_window = EditNameWindow(self.player)
+        self.edit_hero_name_window = EditNameWindow(self.root, self.player)
         # Запретить пользователю взаимодействовать с основным окном
         self.edit_hero_name_window.grab_set()
         # Реагировать только на событие дестроя всего окна, а не каждого его виджета
@@ -712,7 +705,7 @@ class DestinyQuest:
         self.create_stats_hero_field()
 
     def open_money_pouch_window(self, event):
-        self.money_pouch_window = MoneyPouchWindow(self.player)
+        self.money_pouch_window = MoneyPouchWindow(self.root, self.player)
         # Запретить пользователю взаимодействовать с основным окном
         self.money_pouch_window.grab_set()
         # Реагировать только на событие дестроя всего окна, а не каждого его виджета
@@ -726,8 +719,9 @@ class DestinyQuest:
 # =============================================================================================================================
 class EquipmentWindow(tk.Toplevel):
     """ Class for creating a new window for any equipment cell """
-    def __init__(self, player, id_cell, equip: dict, state="active"):
+    def __init__(self, master, player, id_cell, equip: dict, state="active"):
         super().__init__()
+        self.master = master
         self.player = player
         self.id_cell = id_cell
         self.equipment_cell_name = self.id_cell.title().replace("_", " ")
@@ -736,6 +730,15 @@ class EquipmentWindow(tk.Toplevel):
         self.title(f"Сharacteristics {self.equipment_cell_name}")
         self.resizable(False,False)
         self.init_gui()
+        self.update()
+        # Child window in the center of parent window
+        master_width, master_height = tuple(int(_) for _ in self.master.winfo_geometry().split("+", 1)[0].split("x"))
+        master_offset_x, master_offset_y = tuple(int(_) for _ in self.master.winfo_geometry().split('+', 1)[1].split('+'))
+        child_width = self.winfo_reqwidth()
+        child_height = self.winfo_reqheight()
+        x = (master_width - child_width) // 2 + master_offset_x
+        y = (master_height - child_height) // 2 + master_offset_y
+        self.geometry(f"+{x}+{y}")
 
     def activate_state(self, state):
         """ Make equipment window active or not depends on emptyness of the equipment cell """
@@ -819,7 +822,6 @@ class EquipmentWindow(tk.Toplevel):
         # Значит зелье. Необходимо применить один раз
         else:
             self.player.update_modifiers(self.update_package)
-            print("drink!", self.update_package)
             # Очистить ячейку рюкзака
             self.clear_cell()
             self.destroy()
@@ -975,12 +977,22 @@ class EquipmentWindow(tk.Toplevel):
 # =============================================================================================================================
 class EditNameWindow(tk.Toplevel):
     """ Window for editing hero's name, path, career """
-    def __init__(self, player):
+    def __init__(self, master, player):
         super().__init__()
+        self.master = master
         self.player = player
         self.title(f"Edit Hero's name, path, career")
         self.resizable(False,False)
         self.init_gui()
+        self.update()
+        # Child window in the center of parent window
+        master_width, master_height = tuple(int(_) for _ in self.master.winfo_geometry().split("+", 1)[0].split("x"))
+        master_offset_x, master_offset_y = tuple(int(_) for _ in self.master.winfo_geometry().split('+', 1)[1].split('+'))
+        child_width = self.winfo_reqwidth()
+        child_height = self.winfo_reqheight()
+        x = (master_width - child_width) // 2 + master_offset_x
+        y = (master_height - child_height) // 2 + master_offset_y
+        self.geometry(f"+{x}+{y}")
 
     def is_hero_name(self):
         """ Check if hero name is not empty """
@@ -1051,17 +1063,26 @@ class EditNameWindow(tk.Toplevel):
 # =============================================================================================================================
 class MoneyPouchWindow(tk.Toplevel):
     """ Window for editing money pouch """
-    def __init__(self, player):
+    def __init__(self, master, player):
         super().__init__()
+        self.master = master
         self.player = player
         self.title(f"Money pouch")
         self.resizable(False,False)
         self.init_gui()
+        self.update()
+        # Child window in the center of parent window
+        master_width, master_height = tuple(int(_) for _ in self.master.winfo_geometry().split("+", 1)[0].split("x"))
+        master_offset_x, master_offset_y = tuple(int(_) for _ in self.master.winfo_geometry().split('+', 1)[1].split('+'))
+        child_width = self.winfo_reqwidth()
+        child_height = self.winfo_reqheight()
+        x = (master_width - child_width) // 2 + master_offset_x
+        y = (master_height - child_height) // 2 + master_offset_y
+        self.geometry(f"+{x}+{y}")
 
     def operate_save_btn(self):
         try:
             self.money = int(self.money_pouch_sbx.get())
-            print(self.money)
             self.player.money_pouch = self.money
             self.destroy()
         except ValueError:
@@ -1101,7 +1122,6 @@ class MoneyPouchWindow(tk.Toplevel):
 def main():
     root = tk.Tk()
     DestinyQuest(root)
-    # print(dq.__dict__)
     root.mainloop()
 
 if __name__ == "__main__":
